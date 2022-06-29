@@ -221,7 +221,7 @@ crossorigin="anonymous"
       
                   @foreach ( $facs as $fac)
                   <tr>
-                    <td>{{ $fac->id }} </td>
+                    <td>{{ $fac->Fac_num }} </td>
                     <td>{{ $fac->client->Name }}</td>
                     <td>{{ $fac->Type }}</td>
                     <td>{{ $fac->ModePay }}</td>
@@ -911,7 +911,7 @@ crossorigin="anonymous"
                  
                   $('tbody').append('\
                 <tr>\
-              <td>'+item.id+'</td>\
+              <td>'+item.Fac_num+'</td>\
               <td>'+item.client.Name+'</td>\
               <td>'+item.Type+'</td>\
               <td>'+item.ModePay+'</td>\
@@ -929,7 +929,7 @@ crossorigin="anonymous"
               {
                 $('tbody').append('\
                 <tr>\
-              <td>'+item.id+'</td>\
+              <td>'+item.Fac_num+'</td>\
               <td>'+item.client.Name+'</td>\
               <td>'+item.client.Phone+'</td>\
               <td>'+item.client.Adress+'</td>\

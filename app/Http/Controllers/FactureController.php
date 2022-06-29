@@ -46,6 +46,60 @@ class FactureController extends Controller
           
             
                 $Fac =new Facture() ;
+
+                if(request('Type') == "Normal")
+
+                {
+                 
+                  $record = Facture::where('Type','Normal')->latest()->first();
+                 
+
+                }
+
+                else
+                {
+                  $record = Facture::where('Type','like' , 'Proforma%')->latest()->first();
+
+                }
+
+
+                if($record == '' || $record == null)
+                {
+                  if(date('Y') == '2022')
+                  {
+                   if(request('Type') == "Normal")
+                   {
+                    $nextInvoiceNumber = date('Y').'/500';
+
+                   }
+                   else{
+                    $nextInvoiceNumber = date('Y').'/400';
+
+                   }
+
+                  }
+                  else{
+                    $nextInvoiceNumber = date('Y').'/1';
+
+
+                  }
+                }
+  
+                else 
+                {
+  
+                $expNum = explode('/', $record->Fac_num);
+                
+             
+                if ( date('Y-m-d') == date('Y-01-01') ){
+                    $nextInvoiceNumber = date('Y').'/1';
+                } else {
+                    //increase 1 with last invoice number
+                    $nextInvoiceNumber = $expNum[0].'/'. $expNum[1]+1;
+                }
+              }
+  
+                $Fac->Fac_num = $nextInvoiceNumber;
     
                
                 $Fac->ClientId= request('ClientName');
@@ -112,7 +166,7 @@ class FactureController extends Controller
                  
 
 
-                  $Bl->status = 'Facture N°'.$Fac->id;
+                  $Bl->status = 'Facture N°'.$Fac->Fac_num;
                   $Bl->save();
 
                   $Bds = Bldetails::where('Bl_id',$bl)->get();

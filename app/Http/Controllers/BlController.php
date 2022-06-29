@@ -86,7 +86,7 @@ class BlController extends Controller
                 $nextInvoiceNumber = date('Y').'/1';
               }
 
-              else
+              else 
               {
 
               $expNum = explode('/', $record->Bl_num);

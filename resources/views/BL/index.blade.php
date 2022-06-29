@@ -17,7 +17,7 @@
   <div class="col-md-4">
     <input type="text" name="search" class="form-control" id="searchP" placeholder="search" >
   </div>
-  <div class="col-md-4  d-flex " style="width:350px">
+  <div class="col-md-4 col-lg-4 d-flex " style="width:350px">
    
 
 </div>
@@ -25,7 +25,7 @@
 
  
 
-<div class="col-md-4 d-flex justify-content-end">
+<div class="col-md-4 col-xl-4 d-flex justify-content-end">
  
  
 
