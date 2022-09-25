@@ -20,7 +20,7 @@ class ClientController extends Controller
       public function index(){
 
         $clients = Client::orderBy('created_at',"DESC")->paginate(10);
-        $Etats = Client::select(
+    /*    $Etats = Client::select(
           'clients.id',
           'clients.Name',
           'caisses.Amount',
@@ -30,25 +30,35 @@ class ClientController extends Controller
         
           ->leftJoin('caisses', 'caisses.ClientId', '=', 'clients.id')
           ->groupBy('clients.id')
-          ->paginate(10);
+          ->paginate(10);*/
+
+          $caisses = Caisse::where('Operation','Encaissement de Facture/Bl')->get(); 
+          $allBl = Bl::select(
+            'bls.ClientId',
+         
+            DB::raw('Count(bls.id)  as allBl'))
+          
+            ->groupBy('bls.ClientId')
+            ->get();
+
 
           $Bls = Bl::select(
             'bls.ClientId',
-  
+         
             DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
           
             ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
             ->groupBy('bls.ClientId')
             ->get();
 
-            error_log('///////////////*/////'.$Bls);
  
             $credits = Clientcredit::all();
           
+            error_log($allBl);
 
 
        
-          return view('Clients.index',[ 'clients' => $clients, 'Etats' => $Etats ,
+          return view('Clients.index',[ 'clients' => $clients,"caisses" =>$caisses,"allBl" =>$allBl,
                                        'Bls' => $Bls , 'credits' => $credits  ]);
           
          
@@ -89,6 +99,7 @@ class ClientController extends Controller
                 $client->Name = request('ClientName');
                 $client->Phone = request('ClientPhone');
                 $client->Adress = request('ClientAdress');
+                $client->Contact = request('Contact');
                 $client->RC = request('rc');
                 $client->NIF = request('nif');
                 $client->AI = request('ai');
@@ -124,6 +135,7 @@ class ClientController extends Controller
               $client->Name = request('ClientName');
               $client->Phone = request('ClientPhone');
               $client->Adress = request('ClientAdress');
+              $client->Contact = request('Contact');
               $client->RC = request('rc');
               $client->NIF = request('nif');
               $client->AI = request('ai');

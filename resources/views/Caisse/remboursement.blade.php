@@ -86,7 +86,6 @@
             <thead>
                 <tr>
                     <th style="width: 30%">N° Operation</th>
-                    <th style="width: 30%">Désignation</th>
                  
                     <th style="width: 40%">Montant</th>
                 </tr>
@@ -94,7 +93,6 @@
             <tbody>
                 <tr>
                     <td>{{   str_pad($Cais->id, 3, '0', STR_PAD_LEFT)   }}</td>
-                    <td>Remboursement Client</td>
                     <td> {{ number_format($Cais->Amount,2,'.',',')  }} </td>
                 </tr>
 

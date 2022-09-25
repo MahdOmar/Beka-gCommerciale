@@ -28,6 +28,7 @@ class DashboardController extends Controller
         $Bds = Bldetails::all();
         $Payments = Caisse::all();
         $Facture = Bl::where('Status','!=','Not Factured')->get();
+      
 
         $Normal = Facture::where('Type','Normal')->get();
         $Proforma = Facture::where('Type','!=','Normal')->get();

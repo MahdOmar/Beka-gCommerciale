@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Bldetails;
+use Illuminate\Support\Str;
+
 
 use App\Models\Bl;
 use App\Models\Caisdetails;
@@ -35,7 +37,7 @@ class CaisseController extends Controller
        $Credits = Clientcredit::all();
        $user =  Auth::id();
 
-
+ 
     
 
        
@@ -51,16 +53,17 @@ class CaisseController extends Controller
             public function details($id)
             {
               $Caisses = Caisdetails::with('user')->where('Caisse_id',$id)->get();
+              $client = Caisse::find($Caisses[0]->Caisse_id);
               $user = Auth::id();
 
               return view('Caisse.Caissedetails',["Caisses"=>$Caisses , 'user' => $user,
-                                                 ]);
+                                                 'client'=>$client]);
 
 
 
             }
 
-       public function store()
+       public function store2()
        {
        
         
@@ -130,9 +133,6 @@ class CaisseController extends Controller
          {
           $caisse->Operation = "Encaissement de Facture/Bl";
 
-
-
-          
           $Bls = request('Bls');
 
           $credit = Clientcredit::where("ClientId",request('Client'))->get();
@@ -148,8 +148,7 @@ class CaisseController extends Controller
 
           }
           
-        
-          $des ="";
+       
           foreach($Bls as $Bl)
           {
             error_log('in Bls');
@@ -282,6 +281,278 @@ class CaisseController extends Controller
 
        }     
 
+      public function store(){
+        $client = Client::find(request('Client'));
+
+
+         if(request('Type') == "Reglement de depenses")
+
+        
+         {
+          $caisse = new Caisse();
+          if(request('Treg')  == "Autre")
+          {
+          
+            $caisse->Designation = request('Des');
+            $caisse->ClientId = 0;
+          }
+          else{
+            $Bls = Bl::where('ClientId',request('Client'))->get();
+            if(count($Bls) == 0)
+            {
+             
+              return response()->json([
+                "Error"=>"Client Has No Debt",
+                
+              
+              ]);
+            }
+            
+            $total = 0;
+            foreach($Bls as $Bl)
+            {
+    
+            
+            
+              $bds = Bldetails::where('Bl_id',$Bl->id)->get();
+             
+            
+              foreach($bds as $bd)
+              {
+               
+                $total = $total + ($bd->Price_HT *  $bd->Quantity);
+               
+    
+              }
+
+    
+            }
+
+            $caisseClient = Caisse::where('ClientId',request('Client'))->where('Operation','Encaissement de Facture/Bl')->first();
+           
+            if(!$caisseClient || $caisseClient->Amount < $total)
+            {
+              error_log('/*/*********');
+              return response()->json([
+                "Error"=>"Client Has No Debt",
+                
+              
+              ]);
+
+            }
+
+          $debt = $caisseClient->Amount - $total;
+          if($debt < request('Price'))
+          {
+            return response()->json([
+              "Error"=>"Debt inferieur to Amount",
+              
+            
+            ]);
+
+
+          }
+
+         $caisseClient->Amount = $caisseClient->Amount - request('Price');
+         $caisseClient->save();
+
+         $caisse->Designation = "Remboursement Client ".$client->Name;
+         $caisse->ClientId = $client->id;
+
+          
+
+
+
+          }
+         
+
+        $caisse->Operation = "Reglement de depenses";
+         
+        $caisse->Amount = request('Price');
+         $caisse->UserId = Auth::id();
+        
+        
+         $caisse->save();
+         $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
+
+         $user =  Auth::id();
+
+         
+         $Credits = Clientcredit::all();
+      
+
+         return response()->json([
+           "user"=>$user,
+           "caisses" => $caisses,
+           "Credits" => $Credits
+         
+         ]);
+        
+
+        }
+
+        /******* Encaissement de Factures */
+
+        /** Count Total */
+        $Bls = Bl::where('ClientId',request('Client'))->get();
+        if(count($Bls) == 0)
+        {
+         
+          return response()->json([
+            "Error"=>"Client Has No Bl",
+            
+          
+          ]);
+        }
+        
+        $total = 0;
+        foreach($Bls as $Bl)
+        {
+
+        
+        
+          $bds = Bldetails::where('Bl_id',$Bl->id)->get();
+         
+        
+          foreach($bds as $bd)
+          {
+           
+            $total = $total + ($bd->Price_HT *  $bd->Quantity);
+           
+
+          }
+
+
+        }/** End Count Total */
+
+        error_log('total *-----------------* '.$total);
+        $caisse = Caisse::where('ClientId',request('Client'))->first();
+        if($caisse)
+        {
+
+       
+
+        if(($caisse->Amount - $total) > 1)
+        {
+          error_log($caisse->Amount - $total);
+          
+          return response()->json([
+            "Error"=>"Client Has No Credits",
+            
+          
+          ]);
+
+        }
+      }
+
+     //   $credit = Clientcredit::where("ClientId",request('Client'))->get();
+
+
+       /*** Check if Has Credit */
+        // if(count($credit) > 0)
+        // {
+        //   $payment = request('Price') + $credit[0]->Amount;
+        //   $credit[0]->Amount = 0;
+        //   $credit[0]->save();
+      
+        // }
+
+        // else{
+        //   $payment = request('Price');
+
+        // }
+
+        $payment = request('Price');
+     
+        if($caisse){
+
+          $caisse->Amount = $caisse->Amount + $payment;
+          
+          $caisse->save();
+          
+        }
+        else{
+          $caisse = new Caisse();
+          $caisse->Operation = "Encaissement de Facture/Bl";
+          $caisse->Designation = "Payement de ".$client->Name;
+          $caisse->Amount = $payment;
+           $caisse->UserId = Auth::id();
+           $caisse->ClientId = request('Client');
+          
+           error_log($caisse);
+          
+           $caisse->save();
+        }
+
+        
+
+
+          /************Check if there is Money left */
+          // if($caisse->Amount - $total > 0.00001)
+          // {
+          //   if(count($credit) > 0)
+          //   {
+              
+             
+          //     $credit[0]->Amount = $caisse->Amount - $total;
+          //     $credit[0]->save();
+    
+          //   }
+          //   else{
+          //    $add = new Clientcredit();
+           
+          //    $add->Amount = $caisse->Amount - $total;
+          //    $add->ClientId = request('Client');
+         
+           
+          //   $add->save();
+          //   }
+
+
+
+          // }
+          
+        /****** End check ********* */
+ 
+         /**** Save Caisse Details */
+ 
+          $cd =  new Caisdetails();
+          $cd->Bl_id = 0;
+          $cd->Caisse_id = $caisse->id;
+          $cd->Amount = $payment;
+          $cd->UserId = Auth::id();
+ 
+          $cd->save();
+         
+         /**** End Caisse Details */
+ 
+        
+ 
+          
+          $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
+ 
+          $user =  Auth::id();
+ 
+          
+          $Credits = Clientcredit::all();
+       
+ 
+          return response()->json([
+            "user"=>$user,
+            "caisses" => $caisses,
+            "Credits" => $Credits
+          
+          ]);
+ 
+ 
+        }
+        
+
+      
+  
+
+
+
        public function showData(){
 
           
@@ -292,14 +563,73 @@ class CaisseController extends Controller
 
      }
 
+     public function showData2(){
+
+          
+      $caisse = Caisdetails::find(request('id'));
+     
+       return $caisse;
+    
+
+   }
+
 
      public function update(){
 
           
 
       $caisse = Caisse::find(request('id'));
-      $caisse->Designation = request('Des');
-      $caisse->Amount = request('Price');
+      if(Str::contains($caisse->Designation, 'Remboursement'))
+      {
+        $Bls = Bl::where('ClientId',$caisse->ClientId)->get();
+        $total = 0;
+        foreach($Bls as $Bl)
+        {
+
+          $bds = Bldetails::where('Bl_id',$Bl->id)->get();
+         
+        
+          foreach($bds as $bd)
+          {
+           
+            $total = $total + ($bd->Price_HT *  $bd->Quantity);
+           
+
+          }
+
+
+        }
+
+        $caisseClient = Caisse::where('ClientId',$caisse->ClientId)->first();
+
+        $debt = ($caisseClient->Amount + $caisse->Amount) - $total ;
+       
+        if($debt < request('Price'))
+        {
+          return response()->json([
+            "error"=>"Debt inferieur to Amount",
+            
+          
+          ]);
+
+
+        }
+
+        $caisseClient->Amount = $caisseClient->Amount + $caisse->Amount - request('Price');
+        $caisse->Amount = request('Price');
+        $caisseClient->save();
+
+
+
+
+
+      }
+      else{
+        $caisse->Amount = request('Price');
+        $caisse->Designation = request('Des');
+
+
+      }
         
        $caisse->save();
       
@@ -316,6 +646,41 @@ class CaisseController extends Controller
       ]);
 
     }
+
+    public function update2(){
+
+      $caisseD = Caisdetails::find(request('id'));
+
+      $caisse = Caisse::find($caisseD->Caisse_id);
+
+      $caisse->Amount = $caisse->Amount - $caisseD->Amount + request('Price');
+
+      $caisseD->Amount = request('Price');
+
+      $caisse->save();
+      $caisseD->save();
+
+          
+
+       $caisses = Caisdetails::with('user')->where('Caisse_id',$caisseD->Caisse_id)->orderBy('created_at','DESC')->get();
+
+     $user =  Auth::id();
+     
+      
+
+      return response()->json([
+        "user"=>$user,
+        "caisses" => $caisses,
+        "client" => $caisse
+      
+      ]);
+
+    }
+
+
+
+
+
 
     public function destroy(){
       $caisse = Caisse::findOrfail(request('id'));
@@ -339,8 +704,11 @@ class CaisseController extends Controller
 
     $Cais = Caisse::find( $caisse->Caisse_id);
     $Cais->Amount =  $Cais->Amount - $caisse->Amount;
-
     $Cais->save();
+
+
+    
+
    
 
     $caisse->delete();
@@ -501,7 +869,7 @@ class CaisseController extends Controller
 
             
               
-            $Clients = Clientcredit::with('client')->where('Amount','>',0)->get();
+            $Clients = Client::all();
 
              
             $cls =' <option value="" disabled selected>Selectionner Client</option>';
@@ -512,7 +880,7 @@ class CaisseController extends Controller
     
             foreach($Clients as $item) {
             
-              $cls .= '<option value="'.$item->id.'">'.$item->client->Name.'</option>';
+              $cls .= '<option value="'.$item->id.'">'.$item->Name.'</option>';
              
         
             
@@ -530,8 +898,10 @@ class CaisseController extends Controller
                    public function print($id)
                    {
                     $Cais = Caisdetails::find($id);
-                    $Bl = Bl::with('client')->find( $Cais->Bl_id);
-                    return view('Caisse.print',["Cais" =>$Cais , "Bl"=>$Bl]);
+                    $caisse = Caisse::find($Cais->Caisse_id);
+                    $client = Client::find( $caisse->ClientId);
+                    
+                    return view('Caisse.print',["Cais" =>$Cais , "client"=>$client]);
 
                    }
 

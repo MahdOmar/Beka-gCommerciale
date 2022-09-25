@@ -30,43 +30,60 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
         <style>
-         /*   @media print {
+           @media print {
                 body * { visibility: hidden;}
                 
                 .print-page , .print-page *{
                  
                     visibility: visible}
-            }*/
+            }
         </style>
       
     </head>
 
 <body>
 
-<button class="btn btn-success " style="margin-left: 1280px;margin-top:20px;margin-bottom:20px" onclick="window.print();">Print </button>
+   
+  <div style="position: fixed ; right:0%">
+    <button class=" mt-2 btn btn-success "  onclick="window.print();">Print </button>
 
+
+</div>
 
 
 <div  class=" p-3 mb-5   font-weight-bolder  print-page"  style="font-size:20px; margin-left:10px;margin-right:10px">
 <div class="container">
-    <div class="brand-section">
-        <div class="text-center">
-           
-                <img src="/img/logo2.png" alt="">
-        </div>
-          
+  <div class="brand-section d-flex">
+    <div >
+       
+            <img src="/img/log.png" alt="">
     </div>
+    <div class="bg-white" style="font-size:14px; max-height:95px">
+        <p class="mt-4 ml-2" style="line-height: 1.2;  ">Lot. 06, ilot 02, Z.A. Hennaya <br>
+        Tlemcen 13550 - ALGERIE <br>
+        Tél.: 043 434 434 fax: 043 434 435 <br>
+        <b>www.beka-imprimerie.com</b>
+        </p>
+
+
+    </div>
+      
+</div>
 
     <div class="body-section mt-5" >
+
+      @php
+          $expNum = explode('/', $Fac->Fac_num);
+      @endphp
 
         
         <div class="text-center">
         @if ($Fac->Type == 'Normal')
             
-        <h4><b>Facture N<sup>o</sup>{{ $Fac->id }}</b> </h4>
+        <h4><b>Facture N<sup>o</sup>{{ $expNum[1] }}</b> </h4>
 
         @else
-        <h4><b>Facture Proforma N<sup>o</sup>{{ $Fac->id }}</b> </h4>
+        <h4><b>Facture Proforma N<sup>o</sup>{{ $expNum[1] }}</b> </h4>
 
         @endif
 
@@ -74,20 +91,20 @@
        
     </div>
 
-    <div class="body-section mt-5 d-flex" >
+    <div class="body-section mt-2 d-flex" style="font-size:15px" >
         <div class="w-50 m-2">
             <div class="border p-2">
-                <p><i> Date: {{ $Fac->created_at->format('d/m/y') }} </i></p>
+                <p><i> Date: {{ $Fac->created_at->format('d/m/Y') }} </i></p>
             </div>
 
-            <div class="border p-2">
-                <p><b>Client:</b></p>
-                <h4 class="text-uppercase"><b>{{ $Fac->client->Name }}</b></h4>
+            <div class="border ps-2 pt-2">
+                <p class="mb-0"><b>Client:</b></p>
+                <h6 class="text-uppercase" ><b>{{ $Fac->client->Name }}</b></h6>
             </div>
 
             @if ($Fac->Type == 'Normal')
-            <div class="border">
-                <p>Mode de paiement: {{ $Fac->ModePay }}</p>
+            <div class="border ps-2 pt-2">
+                <p >Mode de paiement: {{ $Fac->ModePay }}</p>
             </div>
                 
             @endif
@@ -100,9 +117,9 @@
         <div class=" border w-50 m-2 p-2">
 
             <p class="text-uppercase">{{$Fac->client->Adress}}</p>
-            <h4><b>R C: &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;{{ $Fac->client->RC }}</b></h4>
-            <h4><b>N I F: &nbsp; &nbsp; &nbsp;{{ $Fac->client->NIF }}</b></h4>
-            <h4><b>A I: &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;{{ $Fac->client->AI }}</b></h4>
+            <h4 style="font-size:15px"><b>R C: &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;{{ $Fac->client->RC }}</b></h4>
+            <h4 style="font-size:15px"><b>N I F: &nbsp; &nbsp; &nbsp;{{ $Fac->client->NIF }}</b></h4>
+            <h4 style="font-size:15px"><b>A I: &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;{{ $Fac->client->AI }}</b></h4>
 
 
 
@@ -116,16 +133,16 @@
     </div>
     
 
-    <div class="body-section mt-5 ">
+    <div class="body-section mt-1 ">
 
       
        
-        <table class="table table-bordered table-hover text-center">
+        <table class="table table-bordered table-hover text-center" style="font-size:14px" >
             <thead>
                 <tr>
-                <th style="width: 50%">Désignation</th>
+                <th style="width: 45%">Désignation</th>
                 <th style="width: 15%">Quantité</th>
-                <th style="width: 15%">P.U HT</th>
+                <th style="width: 20%">P.U HT</th>
                 <th style="width: 20%">Montant</th>
                 </tr>
             </thead>
@@ -141,14 +158,22 @@
               $total = $total + ($fac->Price_HT * $fac->Quantity  )
           @endphp
               <tr>
-                <td>{{$fac->Designation}}</td>
-                <td>{{number_format($fac->Quantity,0,'.',',')}} </td>
-                <td>{{ number_format($fac->Price_HT,2,'.',',')}} </td>
-                <td>{{ number_format($fac->Price_HT * $fac->Quantity ,2,'.',',')}} </td>
+                <td class="text-start">{{$fac->Designation}}</td>
+                <td class="text-end">{{number_format($fac->Quantity,0,'.',',')}} </td>
+                <td class="text-end">{{ number_format($fac->Price_HT,2,'.',',')}} </td>
+                <td class="text-end">{{ number_format($fac->Price_HT * $fac->Quantity ,2,'.',',')}} </td>
               
 
             </tr>
             @endforeach
+
+
+            
+
+              
+
+          
+        
 
             <tr >
                 <td style="border-right: 1px solid white;border-left: 1px solid white;"></td>
@@ -157,10 +182,10 @@
             </tr>
 
             <tr  >
-                <td  style="border: 1px solid white">Arrêté la présente Facture  à la somme de :</td>
+                <td class="text-start"  style="border: 1px solid white">Arrêté la présente Facture  à la somme de :</td>
                 <td  style="border-bottom: 1px solid white"></td>
-                <td  class="text-end">Total HT</td>
-                <td>{{ number_format($total  ,2,'.',',')  }} </td>
+                <td  class="text-start">Total HT</td>
+                <td class="text-end">{{ number_format($total  ,2,'.',',')  }} </td>
 
 
               </tr>
@@ -171,8 +196,8 @@
             <tr >
                 <td  id="word" class="text-start" rowspan="2"  style="border: 1px solid white"></td>
                 <td  style="border-bottom: 1px solid white"></td>
-                <td  class="text-end">Taux TVA 19%</td>
-                <td>{{ number_format($total*0.19  ,2,'.',',')  }} </td>
+                <td  class="text-start">Taux TVA 19%</td>
+                <td class="text-end">{{ number_format($total*0.19  ,2,'.',',')  }} </td>
 
 
               </tr>
@@ -180,8 +205,8 @@
               <tr >
              
                 <td  style="border-bottom: 1px solid white"></td>
-                <td  class="text-end">Total TTC</td>
-                <td >{{ number_format($total*0.19 + $total  ,2,'.',',')  }} </td>
+                <td  class="text-start">Total TTC</td>
+                <td class="text-end">{{ number_format($total*0.19 + $total  ,2,'.',',')  }} </td>
 
 
               </tr>
@@ -231,7 +256,15 @@ decimal = getDecimalPart(total);
 
 
 console.log(doConvert(2398));
-document.getElementById('word').innerHTML = '<i>' +doConvert(real)+' Dinars <br>' + doConvert(decimal) + 'centimes </i> ';
+if(decimal != 0)
+{
+  document.getElementById('word').innerHTML = '<i>' +doConvert(real)+' Dinars <br>' + doConvert(decimal) + 'centimes </i> ';
+
+}
+else{
+  document.getElementById('word').innerHTML = '<i>' +doConvert(real)+' Dinars zero centimes <br></i>' ;
+
+}
 
 
 function getDecimalPart(num) {

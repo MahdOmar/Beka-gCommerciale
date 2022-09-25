@@ -6,7 +6,7 @@
 
 <div class="m-3 ">
 
-  <h4><a class="text-info" href="/dashboard">Dashborad</a> / Bls </h4>
+  <h4><a class="text-info" href="/dashboard">Dashborad</a> / Caisse Details </h4>
 
 
 </div>
@@ -30,7 +30,7 @@
           <tr>
             
            
-            <th>BL</th>
+            <th>Client</th>
             <th>Amount</th>
             <th>Date</th>
             <th>User</th>
@@ -43,23 +43,24 @@
 
             @foreach ( $Caisses as $Caisse)
             <tr>
-              <td>Bon N°{{ $Caisse->Bl_id }}</td>
+              <td>{{$client->Designation }}</td>
+            
               <td>{{  number_format($Caisse->Amount,2,'.',',') }}</td>
               <td>{{ $Caisse->created_at->format('d-m-Y') }} </td>
               <td>{{ $Caisse->user->name }} </td>
               @if ($Caisse->user->id == $user)
   
               <td> 
-                <a href="/dashboard/Caissedetails/{{ $Caisse->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
+                <a href="/dashboard/Caissedetails/{{ $Caisse->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
 
-               
+                <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation({{$Caisse->id}})"  ><i class="fas fa-edit"></i></button>
                 <button onclick="deleteOperation({{$Caisse->id}})" id="btn{{$Caisse->id}}" class="btn btn-danger" ><i class="fas fa-trash"></i></button>
                </tr>
                   
               @else
   
               <td> 
-                <a href="/dashboard/Caissedetails/{{ $Caisse->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
+                <a href="/dashboard/Caissedetails/{{ $Caisse->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
 
                 <button onclick="deleteOperation({{$Caisse->id}})" id="btn{{$Caisse->id}}" class="btn btn-danger" disabled ><i class="fas fa-trash"></i></button>
            
@@ -94,7 +95,56 @@
 </div>
 <!-- Transorm Model  -->
 
+<div id="edit" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-md">
 
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+          <h4 class="modal-title">Edit Operation</h4>
+         
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+      </div>
+      <div class="modal-body">
+    
+         <p class="text-success successe text-center"></p>
+         <p class="text-danger errore text-center"></p>
+
+
+         <input type="hidden" id="id" name="id">
+
+        
+
+        <div class="form-group m-2 M" >
+         <label for="priceE" class=" mb-2">Montant:</label>
+         <input type="number"  id="priceE" class="form-control" step="1"  name="price" required>
+     
+        </div>
+
+        
+
+  
+
+  
+      </div>
+      <div class="modal-footer">
+          <button
+          type="button"
+          class="btn btn-danger"
+          data-bs-dismiss="modal"
+        >
+          Fermer
+        </button>
+        <div class="form-group">
+        <button  class="btn btn-dark update">Edit </button>
+        </div> 
+      </div>
+    </form>
+    </div>
+
+  </div>
+</div>
 
 
 
@@ -148,6 +198,168 @@ function deleteOperation(id)
         }
     });
    }
+
+
+   $(function(){
+       
+       $('.update').click(function(){
+           $.ajaxSetup({
+     headers: {
+       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+     }
+   });
+           
+          
+         
+          var data = {
+            'id': $('#id').val(),
+           
+            'Des': $('#DesE').val(),
+            'Price': $('#priceE').val(),
+            
+           
+          }
+           
+            
+      
+          $.ajax({
+             url : '/dashboard/Caisse/update2',
+             data: data,
+             type: 'post',
+           //  contentType: "application/json; charset=utf-8",
+             dataType: 'json',
+             success: function(result)
+             {
+              if(result.error)
+               {
+                 console.log(result.error);
+                $('.errore').text(result.error)
+                setTimeout(function() { $('.errore').text('');}, 2000);
+               }
+            
+           else 
+           {
+            $('.successe').text('Operation Edited')
+             
+
+            fetch(result);
+          
+           
+            
+             setTimeout(function() { $('.successe').text('');
+             $('#edit').modal('toggle');}, 1000);
+            }
+
+
+
+           
+             },
+             error: function()
+            {
+                //handle errors
+                alert('error...');
+            }
+          });
+       });
+      
+   });
+
+   function getOperation(id){
+    $('.success').text("")
+    $.ajaxSetup({
+     headers: {
+       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+     }
+   });
+           
+         
+          var data = {
+            'id': id,
+           
+          }
+         $.ajax({
+             url : '/dashboard/Caisse/showD',
+             data: data,
+             type: 'get',
+           //  contentType: "application/json; charset=utf-8",
+             dataType: 'json',
+             success: function(result)
+             {
+
+              console.log(result);
+              
+                $('#id').val(result.id)
+                $('#DesE').val(result.Designation)
+                $('#priceE').val(result.Amount);
+              
+               
+              
+            
+              
+             }
+          
+            ,
+             error: function()
+            {
+                //handle errors
+                alert('error...');
+            }
+          }); 
+   }
+
+
+   function fetch (result){
+
+
+$('tbody').html('')
+
+            $.each(result.caisses, function(key, item){
+
+          
+            
+              var dateString = moment(item.created_at).format('DD-MM-YYYY');
+              console.log(item.User_id);
+
+            
+              if(result.user == item.UserId)
+              {
+
+            $('tbody').append('\
+            <tr>\
+          <td>'+result.client.Designation+'</td>\
+          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td>'+dateString+' </td>\
+          <td>'+item.user.name+' </td>\
+          <td> <a href="/dashboard/Caissedetails/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>\
+              <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
+              <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
+\
+            </tr>')
+          }
+          else{
+            $('tbody').append('\
+            <tr>\
+          <td>'+result.client.Designation+'</td>\
+          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td>'+dateString+' </td>\
+          <td>'+item.user.name+' </td>\
+          <td> <a href="/dashboard/Caissedetails/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>\
+              <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')" disabled ><i class="fas fa-edit"></i></button>\
+              <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled ><i class="fas fa-trash" ></i></button>\
+\
+            </tr>')
+          }
+
+                      
+
+
+
+
+
+           })
+
+
+}
 
 
 

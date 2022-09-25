@@ -16,33 +16,27 @@
     
         <!-- Fonts -->
         <link rel="dns-prefetch" href="//fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     
         <!-- Styles -->
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
         <link href="{{ asset('css/main.css') }}"  rel="stylesheet">
         <link href="{{ asset('css/all.css') }}"  rel="stylesheet">
         <link href="{{asset('css/virtual-select.min.css')}}"  rel="stylesheet">
+        <link href="{{ asset('css/font.css') }}" rel="stylesheet">
+
 
         
 
         <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
      
    
         <script
-src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-crossorigin="anonymous"
-></script>
-
-<script
-src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
-integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
-crossorigin="anonymous"
-></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+        src="{{asset('js/popper.min.js')}}"
+        ></script>
+        <script
+        src="{{asset('js/bootstrap.min.js')}}"
+        
+        ></script>
 
 
      
@@ -55,6 +49,8 @@ crossorigin="anonymous"
        
 
         <script src="{{ asset('js/jquery.min.js') }}" ></script>
+        <script src="{{ asset('js/sweetalert.min.js') }}" ></script>
+
         <script src="{{ asset('js/virtual-select.min.js') }}" ></script>
       
        

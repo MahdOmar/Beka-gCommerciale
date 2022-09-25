@@ -26,40 +26,16 @@
 
           <p class="text-success success text-center"></p>
            <p class="text-danger error text-center"></p>
-            <div class="form-group m-2">
-                <label for="nameE" class="mb-2">Opération:</label>
-                <select name="nameE" id="Type" class="form-control form-select">
-                  <option value="" disabled selected>Selectionner Type d'Opération</option>
-                  <option value="Encaissement de Facture/Bl" >Encaissement de Facture/Bl</option>
-                  <option value="Reglement de depenses" >Règlement de dépenses</option>
-                
-               
-             </select>    
-                
-               
-               
-            </div> 
+           
 
-            <div class="form-group m-2 regl" style="display: none">
-              <label for="nameE" class="mb-2">Type:</label>
-              <select name="nameE" id="Treg" class="form-control form-select">
-                <option value="" disabled selected>Selectionner Type de Règlement</option>
-                <option value="Client" >Remboursement Client</option>
-                <option value="Autre" >Autre</option>
-              
-             
-           </select>    
-              
-             
-             
-          </div> 
+           
 
 
 
 
 
 
-            <div class="form-group m-2 clients" style="display: none">
+            <div class="form-group m-2 clients" >
               <label for="nameE" class="mb-2">Client:</label>
               <select name="nameE" id="ClientName" class="form-control form-select">
                 <option value="" disabled selected>Selectionner Client</option>
@@ -74,24 +50,49 @@
              
              </div>
 
-           {{-- <div class="form-group m-2 F" style="display: none;">
+            <div class="form-group m-2 F" >
                 <label for="nameE" class="mb-2">Facture:</label>
                 <select name="nameE" id="Facture" placeholder="Native Select" data-search="false" data-silent-initial-value-set="true"  class="form-control  " multiple>
                
                
-             </select>     
+             </select>    
                 
                
                
-               </div> --}}
+               </div>
+
+               <div class="form-group m-2 ">
+                <label for="">Mode de paiement:</label>
+               <select name="nameE" id="Mode" class="form-control form-select">
+                <option value="" disabled selected> Selectionner Mode de paiement</option>
+            
+              <option value="virement"> Versement à la banque</option>
+              <option value="versement"> Virement bancaire</option>
+              <option value="cheque">Chèque bancaire</option>
+              <option value="especes"> Espèces</option>
+
+
+                  
+             
+             
+           </select> 
+           
+        </div>
       
 
-            <div class="form-group m-2 D" style="display: none" >
-                <label for="Des" class=" mb-2">Designation:</label>
+            <div class="form-group m-2 cheq"  style="display: none">
+                <label for="Des" class=" mb-2">Numéro de chèque:</label>
                 <input type="text" id="Des" class="form-control" name="Des"   required>
                
                
            </div>
+
+           <div class="form-group m-2 Date" >
+            <label for="Des" class=" mb-2">Date:</label>
+            <input type="date" id="Des" class="form-control" name="Des"   required>
+           
+           
+       </div>
 
            <div class="form-group m-2 M" >
             <label for="price" class=" mb-2">Montant:</label>
@@ -124,31 +125,10 @@
         <div class="card-body">
 
           <div class="d-flex justify-content-center m-3">
-          <img src="/img/caisse.png" width="150" height="150" alt="">
+          <img src="/img/bank.png" width="150" height="150" alt="">
         </div>
 
-        @php
-        $total = 0 ;
-           foreach($caisse as $cais)
-            {
-              if($cais->Operation == "Encaissement de Facture/Bl")
-              {
-                $total = $total + $cais->Amount;
-
-              }
-
-              else {
-                $total = $total - $cais->Amount;
-              }
-
-            }
-         
-
-          
-           
-        @endphp
-
-          <h4 class="text-center" id="total">Total: {{ number_format($total,2,'.',',')  }}  Da</h4>
+          <h4 class="text-center" id="total">Total:   Da</h4>
         </div>
     </div>
   
@@ -183,8 +163,8 @@
          <input type="hidden" id="id" name="id">
 
          <div class="form-group m-2 D" >
-          <label for="DesE" class=" mb-2">Designation:</label>
-          <input type="text" id="DesE" class="form-control" name="Des"   >
+          <label for="DesE" class=" mb-2">Numéro de Chèque:</label>
+          <input type="text" id="DesE" class="form-control" name="Des"   required>
          
          
          </div>
@@ -263,11 +243,11 @@
           </thead>
           <tbody>
 
-            @foreach ($caisse as $item)
+            {{-- @foreach ($caisse as $item)
             <tr>
               <td>{{ $item->Operation }}</td>
             @if ( $item->Operation == "Encaissement de Facture/Bl" )
-            <td>{{$item->Designation}}</td>
+            <td>Bl N°{{$item->Designation}}</td>
             @else
             <td>{{$item->Designation}}</td>
             @endif
@@ -281,16 +261,16 @@
               @else
               @if ($user == $item->user->id)
               <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation({{$item->id}})"  ><i class="fas fa-edit"></i></button>
+                
+                <button onclick="deleteOperation({{$item->id}})" id="btn{{$item->id}}" class="btn btn-danger" ><i class="fas fa-trash"></i></button>
                 @if (str_contains($item->Designation,'Remboursement Client'))
-                <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>
+                <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
   
                 @endif
-                <button onclick="deleteOperation({{$item->id}})" id="btn{{$item->id}}" class="btn btn-danger" ><i class="fas fa-trash"></i></button>
-              
                   
               @else
               @if (str_contains($item->Designation,'Remboursement Client'))
-             <td> <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
+             <td> <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
              </td>
               @endif
                   
@@ -309,13 +289,13 @@
 
           </tr>
                 
-            @endforeach
+            @endforeach --}}
 
           </tbody>
         </table>
         <div class="pagination d-flex justify-content-center mt-4 ">
       
-          {{ $caisse->links('pagination::bootstrap-4') }}
+          {{-- {{ $caisse->links('pagination::bootstrap-4') }} --}}
   
         </div>
 
@@ -347,31 +327,20 @@ $(function(){
        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
      }
    });
-
          if( ($('.D').is(":visible") && $('#Des').val() == '' &&$('#Treg').val() != "Client" ) || $('#price').val() == '' )
          {
-
             $('.error').text("All fields are required");
-
               setTimeout(function() { $('.error').text('');
                 }, 3000);
-
-
          }
-
-         else if(  $('#price').val() < 0)
+         else if(  $('#price').val() <= 0)
            {
              $('.error').text("Amount can not be 0 or negative");
-
               setTimeout(function() { $('.error').text('');
                 }, 3000);
-
            }
-
            else
-
           {
-
          
           var data = {
            
@@ -400,7 +369,7 @@ $(function(){
               if(result.Error)
                {
                
-                $('.error').text(result.Error)
+                $('.error').text("Montant superieur à Dette de Client ("+result.Error+")")
                 setTimeout(function() { $('.error').text('');}, 2000);
                }
             
@@ -409,13 +378,10 @@ $(function(){
            
             $('.success').text('Operation Added');
              fetch(result)
-
-
           
            
             $('#Des').val('');
             $('#price').val('');
-
            
             setTimeout(function() { $('.success').text('');}, 1000);
        
@@ -458,7 +424,6 @@ $(function(){
              dataType: 'json',
              success: function(result)
              {
-
               console.log(result);
               
                 $('#id').val(result.id)
@@ -479,8 +444,6 @@ $(function(){
             }
           }); 
    }
-
-
           $(function(){
        
        $('.update').click(function(){
@@ -522,7 +485,6 @@ $(function(){
            {
             $('.successe').text('Operation Edited')
              
-
             fetch(result);
           
            
@@ -530,9 +492,6 @@ $(function(){
              setTimeout(function() { $('.successe').text('');
              $('#edit').modal('toggle');}, 1000);
             }
-
-
-
            
              },
              error: function()
@@ -581,11 +540,9 @@ $(function(){
         }
     });
    }
-
    $(function(){
        
        $('#date').change(function(){
-
         
         
         
@@ -609,7 +566,6 @@ $(function(){
              {
            
              fetch(result)
-
               
                  
                 
@@ -624,29 +580,26 @@ $(function(){
        });
       
    });
-
-
    
 $(function(){
        
-       $('#Type , #TypeE').change(function(){
-
+       $('#Mode').change(function(){
         
           var type = $(this).val();
-
-          if( type == "Encaissement de Facture/Bl")
+          if( type == "cheque")
           {
-            $('.F').show();
-            $('.clients').show();
-            $('.regl').hide();
-            $('.D').hide() ;
+            $('.cheq').show();
+            
             
           }
+          else if ( type == "especes"){
+            $('.Date').hide();
+            $('.cheq').hide();
+           
+          }
           else{
-            $('.F').hide();
-            $('.clients').hide();
-            $('.D').show() ;
-            $('.regl').show();
+            $('.cheq').hide();
+            $('.Date').show();
 
 
           }
@@ -655,62 +608,12 @@ $(function(){
        });
       
    });
-
    function fetch (result){
-
-
 $('tbody').html('')
-
             $.each(result.caisses, function(key, item){
-
             
-
-            if(item.Operation == "Reglement de depenses" )
-
-            { 
-
-              if(item.Designation.includes("Remboursement")) 
-              {
-                if(result.user == item.UserId){
-
-                  $('tbody').append('\
-            <tr>\
-          <td>'+item.Operation+'</td>\
-          <td>'+item.Designation+'</td>\
-          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
-            <a href="/dashboard/Caisse/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger"  ><i class="fas fa-trash"></i></button>\
-     \
-            </tr>')
-
-
-
-
-                }
-                else{
-
-               
-                
-                $('tbody').append('\
-            <tr>\
-          <td>'+item.Operation+'</td>\
-          <td>'+item.Designation+'</td>\
-          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  disabled><i class="fas fa-edit"></i></button>\
-            <a href="/dashboard/Caisse/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled ><i class="fas fa-trash"></i></button>\
-     \
-            </tr>')
-
-              }
-            }
-         else{
-
-          if(result.user == item.UserId){
-          
-        
-
+            if(item.Operation == "Reglement de depenses")
+            {
               $('tbody').append('\
             <tr>\
           <td>'+item.Operation+'</td>\
@@ -720,104 +623,75 @@ $('tbody').html('')
             <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
      \
             </tr>')
-          }
-          else{
-
-            $('tbody').append('\
-            <tr>\
-          <td>'+item.Operation+'</td>\
-          <td>'+item.Designation+'</td>\
-          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  disabled><i class="fas fa-edit"></i></button>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled ><i class="fas fa-trash"></i></button>\
-     \
-            </tr>')
-
-
-          }
-
-          }
             }
-            
-
             else
             {
+              if(result.user == item.User_id)
+              {
+              
+              $('tbody').append('\
+            <tr>\
+          <td>'+item.Operation+'</td>\
+          <td> Bon N°'+item.Designation+'</td>\
+          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td> <a href="/dashboard/Caisse/'+item.id+'/details" class="btn btn-success text-white"   role="button" >Details</a>\
+            <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
+                <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
+            </tr>')
+ 
+          }
+          else{
+             
             $('tbody').append('\
             <tr>\
           <td>'+item.Operation+'</td>\
-          <td>'+item.Designation+'</td>\
+          <td> Bon N°'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
           <td> <a href="/dashboard/Caisse/'+item.id+'/details" class="btn btn-success text-white"   role="button" >Details</a>\
             </tr>')
-
-                      }
-
-
-
-
-
+          }
+            }
           total = 0;
           
              $.each(result.caisses, function(key, item){
-
               if(item.Operation == "Encaissement de Facture/Bl")
               {
-
                 total = total + item.Amount;
-
               }
               else{ 
                 total = total - item.Amount;
               }
               
-
+             })
+             $.each(result.Credits, function(key, item){
+              total = total + item.Amount;
              })
            
-           
-
-
             
-
-
-
              $("#total").text('Total: '+total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' Da' )
-
           
-
     
-
-
            })
-
-
 }
-
-
 $(function(){
        
        $('#details').click(function(){
-
         $("#dtable").toggle();
         window.scrollTo(0, document.body.scrollHeight);
                 return false
         
         
-
          
       
           
        });
-
-
        $('#Treg').change(function(){
         $.ajaxSetup({
 headers: {
 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 }
 });
-
         var type = $(this).val();
-
 if( type == "Client")
 {
   
@@ -832,15 +706,10 @@ if( type == "Client")
       success: function(result)
       {
       
-
        
        
-
       $("#ClientName").html(result.html); 
       
-
-
-
       
   
          
@@ -851,47 +720,29 @@ if( type == "Client")
          alert('error...');
      }
    });
-
-
   
 }
 else{
   $('.clients').hide();
   $('.D').show();
-
   
-
-
 }
-
-
-
-
       
-
-
-
  
-
   
 });
       
    });
   
-
    $(function(){
-
     $(document).ready(function(){
-
   
 VirtualSelect.init({ 
 ele: '#Facture' 
 });
-
 });
          
 $('#ClientName').change(function(){
-
  $.ajaxSetup({
 headers: {
 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -901,10 +752,9 @@ headers: {
   
    var client = $(this).val();
   
-
   
    $.ajax({
-      url : '/dashboard/Caisse/bls',
+      url : '/dashboard/Bank/facture',
       data: {'Client':client},
       type: 'get',
      contentType: "application/json; charset=utf-8",
@@ -912,14 +762,10 @@ headers: {
       success: function(result)
       {
       
-
        console.log(result.html);
        
-
        document.querySelector('#Facture').setOptions(result.html);
    
-
-
       
   
          
@@ -930,19 +776,11 @@ headers: {
          alert('error...');
      }
    });
-
-
-
  
  
-
    
 });
-
 });
-
-
    
    
   </script>
-  

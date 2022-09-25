@@ -22,20 +22,29 @@
         <title>Laravel</title>
 
         <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
         <link href="/css/main.css"  rel="stylesheet">
         <link href="/css/all.css"  rel="stylesheet">
+        <link href="{{ asset('css/font.css') }}" rel="stylesheet">
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+        <script src="{{ asset('js/jquery.min.js') }}"></script>
         <style>
             @media print {
                 body * { visibility: hidden;}
+                #imp {
+                    display: none
+                }
+              
                 
-                .print-page , .print-page *{
+                .print-page , .print-page *  {
                  
-                    visibility: visible}
+                    visibility: visible;
+                    
+                }
+               
+
+                
             }
         </style>
       
@@ -43,16 +52,45 @@
 
 <body>
 
-<button class="btn btn-success " style="margin-left: 1280px;margin-top:20px;margin-bottom:20px" onclick="window.print();">Print </button>
+        
+            <div class="form-group m-2 " style="position: fixed; right:15%">
+                <label for="nameE" class="mb-2">Type Impression:</label>
+                <select name="nameE" id="ImpType" class="form-control form-select">
+                  <option value="" disabled selected>Selectionner Type D'Impression</option>
+                  <option value="Avec">Avec Détails TVA</option>
+                  <option value="Sans" >Sans Détails TVA</option>
+                  <option value="Montant" >Sans Montant</option>
+
+             </select>    
+                
+               </div>
+
+        
+        <div style="position: fixed ; right:0%">
+            <button class=" mt-2 btn btn-success "  onclick="window.print();">Print </button>
+
+
+        </div>
+
+
 
 
 
 <div  class=" p-3 mb-5   font-weight-bolder  print-page"  style="font-size:20px; margin-left:10px;margin-right:10px">
 <div class="container">
-    <div class="brand-section">
-        <div class="text-center">
+    <div class="brand-section d-flex">
+        <div >
            
-                <img src="/img/logo2.png" alt="">
+                <img src="/img/log.png" alt="">
+        </div>
+        <div class="bg-white" style="font-size:14px; max-height:95px">
+            <p class="mt-4 ml-2" style="line-height: 1.2;  ">Lot. 06, ilot 02, Z.A. Hennaya <br>
+            Tlemcen 13550 - ALGERIE <br>
+            Tél.: 043 434 434 fax: 043 434 435 <br>
+            <b>www.beka-imprimerie.com</b>
+            </p>
+
+
         </div>
           
     </div>
@@ -61,7 +99,7 @@
 
         <div class="d-flex justify-content-end">
 
-            <p class="text-right"><u>Tlemcen, le {{ $Bl->created_at->format('d/m/Y') }}</u> </p>
+            <p class="text-right" style="font-size:14px"><u>Tlemcen, le {{ $Bl->created_at->format('d/m/Y') }}</u> </p>
 
         </div>
         <div class="text-center">
@@ -78,7 +116,7 @@
         <h4 class="m-3 font-weight-bold"><i>Client:</i> &nbsp; &nbsp; &nbsp; <b>{{ $Bl->client->Name }}</b>    </h4>
       
        
-        <table class="table table-bordered table-hover text-center">
+        <table class="table table-bordered table-hover text-center" style="font-size:14px">
             <thead>
                 <tr>
                     <th style="width: 40%">Désignation</th>
@@ -102,14 +140,14 @@
             $total = $total + ($Bl->Price_HT * $Bl->Quantity  )
         @endphp
             <tr>
-                <td>{{$Bl->Designation}}</td>
+                <td class="text-start">{{$Bl->Designation}}</td>
                 <td>{{number_format($Bl->Quantity,0,'.',',')}} </td>
                 <td>{{$Bl->Colis}} </td>
             
              
-              <td>{{ number_format($Bl->Price_HT,2,'.',',')}} </td>
+              <td class="text-end">{{ number_format($Bl->Price_HT,2,'.',',')}} </td>
               
-              <td>{{ number_format($Bl->Price_HT * $Bl->Quantity ,2,'.',',')}}</td>
+              <td class="text-end">{{ number_format($Bl->Price_HT * $Bl->Quantity ,2,'.',',')}}</td>
             
 
           </tr>
@@ -126,7 +164,7 @@
 
 
                 <td  class="text-end">TOTAL</td>
-                <td>{{ number_format($total  ,2,'.',',')  }} </td>
+                <td  class="text-end">{{ number_format($total  ,2,'.',',')  }} </td>
 
 
               </tr>
@@ -163,6 +201,17 @@
 
      
 </div>   
+  
+
+    <div class="bottom" style="position: fixed; bottom: 0px; visibility:hidden ">
+        <div >
+            <p style="font-size: 11px"> <b>R.C.N°:</b>  1331046/A/01 &nbsp;&nbsp; <b> M.F:</b> 1973 130 102 708 33 &nbsp;&nbsp; <b>A.I :</b> 13260551433 &nbsp;&nbsp; <b>NIS </b> 197313010270833 &nbsp;&nbsp;  <b>C.B: SGA :</b>  021 004021130005514-62
+                 </p>
+        </div>
+      
+    
+    </div>
+
 </div>
 
 
@@ -170,6 +219,136 @@
 
 
 
+
+
+
+
+<script>
+
+var userData = <?php echo json_encode($Bldetails)?>;
+
+$('#ImpType').change(function(){
+
+    console.log(userData)
+
+        
+var type = $(this).val();
+
+if( type == "Avec")
+{
+
+
+
+    $('tbody').html('')
+
+              $.each(userData, function(key, item){
+
+             
+              
+                
+               
+                $('tbody').append('\
+              <tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>'+item.Colis+'</td>\
+            <td  class="text-end">'+(item.Price_HT / 1.19).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+((item.Price_HT / 1.19) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>')
+
+
+             })
+
+             $('tbody').append(' <tr>\
+                <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white ;"></td>\
+                <td  class="text-start">TOTAL HT</td>\
+                <td  class="text-end">{{ number_format($total /1.19 ,2,'.',',')  }} </td>\
+              </tr>\
+            <tr >\
+                <td  id="word" class="text-start" rowspan="2"  style="border: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;"></td>\
+                <td  class="text-start"> TVA </td>\
+                <td  class="text-end">{{ number_format($total/1.19 * 0.19  ,2,'.',',')  }} </td>\
+              </tr>\
+              <tr >\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-left: 1px solid white"></td>\
+                <td class="text-start" class="text-end">TTC</td>\
+                <td  class="text-end" >{{ number_format($total ,2,'.',',')  }} </td>\
+              </tr>')
+
+  
+}
+else if( type == "Montant"){
+  
+    $('tbody').html('')
+
+$.each(userData, function(key, item){
+
+
+
+  
+ 
+  $('tbody').append('\
+<tr>\
+<td  class="text-start">'+item.Designation+'</td>\
+<td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+<td>'+item.Colis+'</td>\
+<td></td>\
+<td></td>\
+</tr>')
+
+
+})
+
+$('tbody').append(' <tr>\
+  <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
+  <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+  <td  style="border-bottom: 1px solid white ;"></td>\
+  <td  >TOTAL </td>\
+  <td> </td>\
+</tr>')
+
+
+
+}
+else{
+    $('tbody').html('')
+
+              $.each(userData, function(key, item){
+
+             
+              
+                
+               
+                $('tbody').append('<tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td >'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>'+item.Colis+'</td>\
+            <td  class="text-end">'+(item.Price_HT ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+(item.Price_HT * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>')
+            })
+              $('tbody').append(' <tr>\
+                <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white ;"></td>\
+                <td  >TOTAL </td>\
+                <td  class="text-end">{{ number_format($total ,2,'.',',')  }} </td>\
+              </tr>')
+            
+
+}
+
+
+});
+
+
+
+</script>
 
 
 </body>

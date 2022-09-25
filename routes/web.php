@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BankController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -97,7 +98,11 @@ Route::get('/dashboard/Caisse/{id}/details', [CaisseController::class, 'details'
 
 Route::post('/dashboard/Caisse/depense', [CaisseController::class, 'store']);
 Route::get('/dashboard/Caisse/show',[CaisseController::class, 'showData']  );
+Route::get('/dashboard/Caisse/showD',[CaisseController::class, 'showData2']  );
+
 Route::post('/dashboard/Caisse/update',[CaisseController::class, 'update']);
+Route::post('/dashboard/Caisse/update2',[CaisseController::class, 'update2']);
+
 Route::delete('/dashboard/Caisse/delete',[CaisseController::class, 'destroy']);
 Route::delete('/dashboard/Caissedetails/delete',[CaisseController::class, 'destroyDetails']);
 
@@ -107,9 +112,12 @@ Route::get('/dashboard/Caisse/clients',[CaisseController::class, 'CredisClients'
 Route::get('/dashboard/Caissedetails/{id}/print',[CaisseController::class, 'print']);
 Route::get('/dashboard/Caisse/{id}/print',[CaisseController::class, 'remob']);
 
+// Bank Routes
 
 
 
+Route::get('/dashboard/Bank', [BankController::class, 'index']);
+Route::get('/dashboard/Bank/facture', [BankController::class, 'factures']);
 
 
 

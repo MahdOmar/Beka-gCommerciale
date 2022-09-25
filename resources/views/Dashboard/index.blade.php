@@ -18,40 +18,18 @@
 
         $countP = 0;
         $countN = 0;
-
-        foreach ($bls as $bl ) 
-        {
-          $total = 0 ;
+        $total = 0 ;
+      
+       
 
           foreach ($Bds as $Bd)
           {
-            if($Bd->Bl_id == $bl->id)
-               {
+            
                  $total = $total + $Bd->Price_HT *  $Bd->Quantity;
-               }
+               
           }
 
-          foreach ($Payments as $item)
-            if ($item->Designation == $bl->id)
-            {
-                if ($item->Amount == $total)
-                {
-                  
-                    $countP ++ ;
-                }
-
-                else
-                {
-                    
-                    $countN ++ ;
-                }
-
-            }
-            
-
-
-
-        }
+        
 
 
 
@@ -103,6 +81,90 @@ foreach($Payments as $cais)
       }
     }
 
+ ///////   /// Total Créance 
+    $dettes = 0 ;
+
+  
+      foreach ($Clinets as $client) {
+        $total = 0;
+       foreach ($bls as $bl  ) {
+        if($bl->ClientId == $client->id)
+        {
+          
+        foreach ($Bds as $bd ) {
+          if($bd->Bl_id == $bl->id)
+          {
+            $total = $total + $bd->Price_HT *  $bd->Quantity;
+
+          }
+          
+        }
+        
+
+        }
+
+
+
+       }
+
+       foreach ($Payments as $cais ) {
+        if($cais->ClientId == $client->id)
+        {
+          if($cais->Amount > $total)
+          {
+            $dettes = $dettes + ($cais->Amount - $total);
+          }
+        }
+       }
+
+      }
+
+
+  //*/************* Creance *----------------------/
+  
+  $creances = 0 ;
+
+  
+foreach ($Clinets as $client) {
+  $total = 0;
+ foreach ($bls as $bl  ) {
+  if($bl->ClientId == $client->id)
+  {
+    
+  foreach ($Bds as $bd ) {
+    if($bd->Bl_id == $bl->id)
+    {
+      $total = $total + $bd->Price_HT *  $bd->Quantity;
+
+    }
+    
+  }
+  
+
+  }
+
+
+
+ }
+
+ foreach ($Payments as $cais ) {
+  if($cais->ClientId == $client->id)
+  {
+    if($cais->Amount < $total)
+    {
+      $creances = $creances + ($total - $cais->Amount );
+    }
+  }
+ }
+
+}
+
+
+      
+    $factured = count($Facture);
+    $not_factured =  count($bls) - count($Facture)
+
+
 
 
   
@@ -134,16 +196,13 @@ foreach($Payments as $cais)
                 <div class="card-footer bg-primary text-white">
                     <div class="row text-center">
                         <div class="col">
-                            <h4 class="m-0 text-white">{{$countP }}</h4>
-                            <span>Payé</span>
+                            <h4 class="m-0 text-white">{{count($bls) - count($Facture)  }}</h4>
+                            <span>Non Facturés</span>
                         </div>
-                        <div class="col">
-                            <h4 class="m-0 text-white">{{$countN }}</h4>
-                            <span>Non Payé</span>
-                        </div>
+                        
                         <div class="col">
                             <h4 class="m-0 text-white">{{count($Facture) }}</h4>
-                            <span>Facturé</span>
+                            <span>Facturés</span>
                         </div>
                     </div>
                 </div>
@@ -206,11 +265,11 @@ foreach($Payments as $cais)
             <div class="card-footer bg-warning text-white">
                 <div class="row text-center">
                     <div class="col">
-                        <h4 class="m-0 text-white">{{ number_format( $totalbdl - $totalCaisse,2,'.',',' )}} DA</h4>
+                        <h4 class="m-0 text-white">{{ number_format($creances,2,'.',',' )}} DA</h4>
                         <span>Créance</span>
                     </div>
                     <div class="col">
-                        <h4 class="m-0 text-white">{{ number_format( $credit[0]->total,2,'.',',') }} DA</h4>
+                        <h4 class="m-0 text-white">{{ number_format( $dettes,2,'.',',') }} DA</h4>
                         <span>Dettes</span>
                     </div>
                    
@@ -287,7 +346,7 @@ foreach($Payments as $cais)
                 <div class="row">
                   <div class="col">
                     <h5 class="card-title text-uppercase  mb-0">Dettes</h5>
-                    <span class="h2 font-weight-bold mb-0"> {{ number_format( $credit[0]->total,2,'.',',') }} DA</span>
+                    <span class="h2 font-weight-bold mb-0"> {{ number_format(  $dettes,2,'.',',') }} DA</span>
                   </div>
                 
                 </div>
@@ -355,8 +414,15 @@ foreach($Payments as $cais)
 @endsection
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script
+src="{{asset('js/Highcharts.js')}}"
+
+></script>
+
+<script
+src="{{asset('js/Charts.js')}}"
+
+></script>
 
 
 <script>
@@ -433,8 +499,8 @@ $(document).ready(function(){
 
 <script>
   $(document).ready(function(){
-    var  comp =  <?php echo json_encode($enc)?>;
-    var pen =  <?php echo json_encode($reg)?>;
+    var  comp =  <?php echo json_encode(count($Facture))?>;
+    var pen =  <?php echo json_encode(count($bls) - count($Facture))?>;
 
     let barchart = new Chart('doughnut_chart',{
         type:'doughnut',
@@ -450,13 +516,13 @@ $(document).ready(function(){
         }
     })
 
-    var  comp =  <?php echo json_encode($countP)?>;
-    var pen =  <?php echo json_encode($countN)?>;
+    var  comp =  <?php echo json_encode(count($Facture))?>;
+    var pen =  <?php echo json_encode(count($bls) - count($Facture))?>;
 
     let barchart2 = new Chart('Pay',{
         type:'doughnut',
         data:{
-            labels:['Payés','Non Payés'],
+            labels:['Facturés','Non Facturés'],
             datasets: [
                 {
                     label:'Points',

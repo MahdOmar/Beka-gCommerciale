@@ -63,13 +63,16 @@
 
                 <td>
     
+                  <a  data-bs-toggle="modal" data-bs-target="#myModal2" class="btn btn-primary text-white" role="button" onclick="getDetails({{ $bl->id }})"><i class="fas fa-edit"></i></a>
+
                   <button onclick="deleteDetails({{$bl->id}})" id="btn{{$bl->id}}" class='btn btn-danger'><i class="fas fa-trash"></i></button>
           </td>
                     
                 @else
 
                 <td>
-    
+                  <a  data-bs-toggle="modal" data-bs-target="#myModal2" class="btn btn-primary text-white" role="button" disabled onclick="getDetails({{ $bl->id }})"><i class="fas fa-edit"></i></a>
+
                   <button onclick="deleteDetails({{$bl->id}})" id="btn{{$bl->id}}" class='btn btn-danger' disabled><i class="fas fa-trash"></i></button>
           </td>
                     
@@ -354,7 +357,7 @@
           
 
                 setTimeout(function() { $('.success').text('');
-                $('#myModal').modal('toggle')
+                
             }, 1000);
 
             
@@ -626,10 +629,11 @@ $('tbody').html('')
                  <tr>\
                     <td>'+item.Designation+'</td>\
                     <td>'+item.Quantity+'</td>\
-                    <td> '+(item.Price_HT).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' DA</td>\
                     <td>'+item.Colis+'</td>\
+                    <td> '+(item.Price_HT).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' DA</td>\
                     <td>'+((item.Price_HT * item.Quantity)  ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,") +' DA</td>\
                     <td>\
+                      <a  data-bs-toggle="modal" data-bs-target="#myModal2" class="btn btn-primary text-white" role="button" onclick="getDetails('+item.id+')"><i class="fas fa-edit"></i></a>\
                           <button onclick="deleteDetails('+item.id+')" id="btn'+item.id+'" class="btn btn-danger"><i class="fas fa-trash"></i></button>\
                  </td>\
                 </tr>')
@@ -642,10 +646,11 @@ $('tbody').html('')
                  <tr>\
                     <td>'+item.Designation+'</td>\
                     <td>'+item.Quantity+'</td>\
-                    <td> '+(item.Price_HT).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' DA</td>\
                     <td>'+item.Colis+'</td>\
+                    <td> '+(item.Price_HT).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' DA</td>\
                     <td>'+((item.Price_HT * item.Quantity)  ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,") +' DA</td>\
                     <td>\
+                      <a  data-bs-toggle="modal" data-bs-target="#myModal2" class="btn btn-primary text-white" role="button" onclick="getDetails('+item.id+')"><i class="fas fa-edit"></i></a>\
                           <button onclick="deleteDetails('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled><i class="fas fa-trash"></i></button>\
                  </td>\
                 </tr>')

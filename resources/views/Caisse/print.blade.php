@@ -71,18 +71,17 @@
         </div>
        
     </div>
-    
+     
 
     <div class="body-section mt-5 ">
 
-        <h4 class="m-3 font-weight-bold"><i>Client:</i> &nbsp; &nbsp; &nbsp; <b>{{ $Bl->client->Name }}</b>    </h4>
+        <h4 class="m-3 font-weight-bold"><i>Client:</i> &nbsp; &nbsp; &nbsp; <b>{{ $client->Name }}</b>    </h4>
       
        
         <table class="table table-bordered table-hover text-center">
             <thead>
                 <tr>
                     <th style="width: 30%">N° Operation</th>
-                    <th style="width: 30%">Désignation</th>
                  
                     <th style="width: 40%">Montant</th>
                 </tr>
@@ -90,7 +89,6 @@
             <tbody>
                 <tr>
                     <td>{{   str_pad($Cais->id, 3, '0', STR_PAD_LEFT)   }}</td>
-                    <td>Bon N°{{$Cais->Bl_id}}</td>
                     <td> {{ number_format($Cais->Amount,2,'.',',')  }} </td>
                 </tr>
 
