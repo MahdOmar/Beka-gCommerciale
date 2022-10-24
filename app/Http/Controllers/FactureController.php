@@ -87,7 +87,6 @@ class FactureController extends Controller
     $Fac->Type = request('Type');
 
     if (request('Type') == "Proforma") {
-      error_log('///////// ' . request("TypeP"));
       $Fac->ModePay = "-";
       if (request('TypeP') == "new") {
 
@@ -111,6 +110,7 @@ class FactureController extends Controller
       }
     } else {
       $Fac->ModePay = request('Mode');
+      $Fac->Status = "Not Payed";
     }
 
 
@@ -337,7 +337,7 @@ class FactureController extends Controller
 
     foreach ($items as $item) {
       $opt = new option();
-      $opt->label = "Bon N°" . $item->id;
+      $opt->label = "Bon N°" . $item->Bl_num;
       $opt->value = $item->id;
 
       array_push($html, $opt);

@@ -82,7 +82,6 @@
                     <div class="modal-header">
                       <h5 class="modal-title" id="exampleModalLongTitle">{{$client->Name}}</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
                     <div class="modal-body">
@@ -111,16 +110,16 @@
                       <div class="row">
                         <div class="col-md-4">
                             <strong>RC</strong>
-                            <p id="rc">{{ $client->RC }}</p>
+                            <p id="rcv">{{ $client->RC }}</p>
                         </div>
             
                         <div class="col-md-4">
                             <strong>NIF</strong>
-                            <p id="nif">{{ $client->NIF }}</p>
+                            <p id="nifv">{{ $client->NIF }}</p>
                         </div>
                         <div class="col-md-4">
                             <strong>AI</strong>
-                            <p id="ai">{{ $client->AI }}</p>
+                            <p id="aiv">{{ $client->AI }}</p>
                         </div>
                       </div>
             
@@ -131,7 +130,7 @@
             
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-info" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-info text-white" data-bs-dismiss="modal">Close</button>
                     </div>
                   </div>
                 </div>
@@ -185,8 +184,10 @@
      
       <th>Name</th>
       <th>Total Bls</th>
+      <th>Total Factures</th>
       <th>Paid</th>
       <th>Left</th>
+      <th>Tax</th>
       <th>Credit</th>
     </tr>
   </thead>
@@ -196,6 +197,7 @@
    
     @php
         $test_bls = false;
+        $test_facs = false;
     @endphp
     <tr>
       <td>{{ $client->Name }}</td>
@@ -213,89 +215,126 @@
 
       @if (!$test_bls)
       <td>0</td>
+
+      
           
       @endif
+
+      @foreach ($allFactures as $item)
+      @if ($item->ClientId == $client->id)
+      <td>{{ $item->allFactures }} </td>
+      @php
+          $test_facs = true;
+      @endphp
+          
+      @endif
+      
+          
+      @endforeach
+
+      @if (!$test_facs)
+      <td>0</td>
+
+      
+          
+      @endif
+      
 
       @php
           $test_caisse = false;
       @endphp
 
-      
-      @foreach ($caisses as $caisse)
-          @if ($caisse->ClientId == $client->id)
-          <td>{{ number_format($caisse->Amount,2,'.',',') }}</td>
-          @php
-          $test_caisse = true;
-           @endphp
-         @foreach ($Bls as $item)
-           @if ($caisse->ClientId == $item->ClientId)
-             @if ($item->total - $caisse->Amount > 0.00001 )
-             <td>{{ number_format($item->total - $caisse->Amount ,2,'.',',') }}</td>
-            
-             @else
-             <td>{{ number_format(0 ,2,'.',',') }}</td>
-           
-             @endif
-
-           @endif
-             
-         @endforeach
-              
-          @endif
-
-
-      @endforeach
-      @if (!$test_caisse)
-      <td>{{ number_format(0,2,'.',',') }}</td>
       @php
-          $test_total = false;
+      $total_payed = 0;
+      $total_tax = 0;
+          foreach($caisses as $cais)
+          {
+            if ($cais->ClientId == $client->id)
+            {
+              $total_payed += $cais->Amount;
+              if($cais->Operation == "Encaissement de Facture")
+            {
+              $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
+              foreach($caisdetails as $details)
+              {
+                $total_tax += $details->Amount /1.01 * 0.01;
+
+                
+              }
+            }
+            }
+          }
+          foreach($banks as $bank)
+          {
+            if ($bank->ClientId == $client->id)
+            {
+              $total_payed = $total_payed + $bank->Total_Amount;
+              
+            }
+          }
+
+           $total_romb = 0;
+
+          foreach ($rembo as $item) {
+            if($item->ClientId == $client->id )
+            {
+              $total_romb += $item->total;
+
+
+            }
+          }
+
+          $total_payed -= $total_romb;
+
+
+
+
+
       @endphp
-      @foreach ($Bls as $item)
-           @if ($client->id == $item->ClientId)
-           
-             <td>{{ number_format($item->total ,2,'.',',') }}</td>
-             @php
-          $test_total = true;
-      @endphp
 
-           @endif
-             
-         @endforeach
+         <td>{{ number_format($total_payed,2,'.',',') }}</td>
 
-         @if (!$test_total)
-         <td>{{ number_format(0 ,2,'.',',') }}</td>
-             
-         @endif
+      @php
+          $total_left = 0;
+          $total_credit = 0;
+          foreach($Bls as $bl)
+          {
+            if($bl->ClientId == $client->id)
+            {
+              $total_left = $bl->total + $total_tax - $total_payed;
+            }
+          }
 
+          if($total_left < 0)
+          {
+            $total_credit = -$total_left;
+            $total_left = 0;
+          
+
+          }
+          $total_romb = 0;
+
+          foreach ($rembo as $item) {
+            if($item->ClientId == $client->id && str_contains($item->Designation, 'Remboursement' ))
+            {
+              $total_romb += $item->total;
+
+
+            }
+          }
 
           
-      @endif
 
-      @php
-          $test = false;
+
       @endphp
-     
-     @foreach ($caisses as $caisse)
-     @if ($caisse->ClientId == $client->id)
-    
-     @foreach ($Bls as $item)
-      @if ($caisse->ClientId == $item->ClientId)
-        @if ( $caisse->Amount -$item->total > 0 )
-        <td>{{ number_format($caisse->Amount - $item->total ,2,'.',',') }}</td>
        
-        @else
-        <td>{{ number_format(0 ,2,'.',',') }}</td>
-      
-        @endif
 
-      @endif
-        
-    @endforeach
-         
-     @endif
+       <td>{{ number_format($total_left,2,'.',',') }}</td>
+       <td>{{ number_format($total_tax,2,'.',',') }}</td>
+       <td>{{ number_format($total_credit - $total_romb ,2,'.',',') }}</td>
 
 
- @endforeach
+
 
       
     
@@ -366,21 +405,21 @@
   <div class="form-group m-2  ">
    
     <label for="adress" class="mb-2">R C:</label>
-    <input type="text" class="form-control" name="ClientAdress" id="rc"  required>
+    <input type="text" class="form-control" name="rc" id="rc"  required>
 
 </div>
 
 <div class="form-group m-2  ">
    
     <label for="adress" class="mb-2">N I F:</label>
-    <input type="text" class="form-control" name="ClientAdress" id="nif"  required>
+    <input type="text" class="form-control" name="nif" id="nif"  required>
 
 </div>
 
 <div class="form-group m-2  ">
    
     <label for="adress" class="mb-2">A I:</label>
-    <input type="text" class="form-control" name="ClientAdress" id="ai"  required>
+    <input type="text" class="form-control" name="ai" id="ai"  required>
 
 </div>
 
@@ -538,8 +577,10 @@ $(function(){
      }
    });
 
-      if( $('#ClientName').val()  == '' ||   $('#ClientPhone').val() == '' || $('#ClientAdress').val() == '' 
-              || $('#rc').val()  == '' || $('#nif').val()  == '' || $('#ai').val()  == '')
+   console.log($('#rc').val());
+
+      if( $('#ClientName').val()  == '' ||   $('#ClientPhone').val() == '' || $('#ClientAdress').val() == ''   || $('#rc').val()  == '' || $('#nif').val()  == '' || $('#ai').val()  == ''
+            )
       {
        
         $('.error').text("All fields are required");
@@ -873,9 +914,9 @@ function fetch (result){
               $("#exampleModalCenter"+item.id+" #phonne").html(item.Phone);
               $("#exampleModalCenter"+item.id+" #adress").html(item.Adress);
               $("#exampleModalCenter"+item.id+" #contact").html(item.Contact);
-              $("#exampleModalCenter"+item.id+" #rc").html(item.RC);
-              $("#exampleModalCenter"+item.id+" #nif").html(item.NIF);
-              $("#exampleModalCenter"+item.id+" #ai").html(item.AI);
+              $("#exampleModalCenter"+item.id+" #rcv").html(item.RC);
+              $("#exampleModalCenter"+item.id+" #nifv").html(item.NIF);
+              $("#exampleModalCenter"+item.id+" #aiv").html(item.AI);
 
 
 

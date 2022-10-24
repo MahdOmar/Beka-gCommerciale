@@ -29,7 +29,7 @@
         <thead class="bg-dark text-white">
           <tr>
             
-           
+           <th>Num</th>
             <th>Client</th>
             <th>Amount</th>
             <th>Date</th>
@@ -43,6 +43,8 @@
 
             @foreach ( $Caisses as $Caisse)
             <tr>
+              <td>{{$Caisse->id }}</td>
+
               <td>{{$client->Designation }}</td>
             
               <td>{{  number_format($Caisse->Amount,2,'.',',') }}</td>

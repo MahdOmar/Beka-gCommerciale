@@ -105,16 +105,16 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
+                                  <a class="dropdown-item" href="{{ route('logout') }}"
+                                     onclick="event.preventDefault();
+                                                   document.getElementById('logout-form').submit();">
+                                      {{ __('Logout') }}
+                                  </a>
 
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </div>
+                                  <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                      @csrf
+                                  </form>
+                              </div>
                             </li>
                         @endguest
                     </ul>
@@ -143,8 +143,9 @@
       <li><a class="{{ (request()->segment(2) == 'BL') ? 'active' : '' }}"  href="/dashboard/BL"><i class="fa-solid fa-file-invoice-dollar"></i>Gestion de BL</a></li>
       <li><a class="{{ (request()->segment(2) == 'Factures') ? 'active' : '' }}" href="/dashboard/Factures"><i class="fa-solid fa-file-lines"></i>Gestion de Facture</a></li>
 
-      <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de Caisse</a></li>
-    
+      <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de la Caisse</a></li>
+      <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li>
+
      
 
         
@@ -208,6 +209,7 @@
                   <th>Client Name</th>
                   <th>Type</th>
                   <th>Mode de Payment</th>
+                  <th>Status</th>
                   <th>Date</th>
                   <th>User</th>
                   <th>Options</th>
@@ -221,6 +223,7 @@
                     <td>{{ $fac->client->Name }}</td>
                     <td>{{ $fac->Type }}</td>
                     <td>{{ $fac->ModePay }}</td>
+                    <td>{{ $fac->Status }}</td>
                     
                     <td>{{ $fac->created_at->format('d-m-Y') }} </td>
                     <td>{{ $fac->user->name }} </td>
@@ -355,9 +358,10 @@
                   <label for="nameE" class="mb-2">Mode de Payment:</label>
                   <select name="nameE" id="Mode" class="form-control form-select">
                     <option value="" disabled selected>Selectionner Mode de Payment</option>
-                    <option value="cheque" >Chéque Bancaire</option>
-                    <option value="verment" >Verment</option>
-                    <option value="especes" >Especes</option>
+                    <option value="Versement à la banque"> Versement à la banque</option>
+                    <option value="Virement bancaire"> Virement bancaire</option>
+                    <option value="Chèque bancaire">Chèque bancaire</option>
+                    <option value="Espèces"> Espèces</option>
                   
                  
                </select>    
@@ -911,6 +915,7 @@ crossorigin="anonymous"
               <td>'+item.client.Name+'</td>\
               <td>'+item.Type+'</td>\
               <td>'+item.ModePay+'</td>\
+              <td>'+item.Status+'</td>\
               <td>'+dateString+' </td>\
               <td>'+item.user.name+' </td>\
               <td>\
@@ -927,8 +932,9 @@ crossorigin="anonymous"
                 <tr>\
               <td>'+item.Fac_num+'</td>\
               <td>'+item.client.Name+'</td>\
-              <td>'+item.client.Phone+'</td>\
-              <td>'+item.client.Adress+'</td>\
+              <td>'+item.Type+'</td>\
+              <td>'+item.ModePay+'</td>\
+              <td>'+item.Status+'</td>\
               <td>'+dateString+' </td>\
               <td>'+item.user.name+' </td>\
               <td>\
@@ -1020,7 +1026,7 @@ crossorigin="anonymous"
 
    
          
-         $('#Type').change(function(){
+         $('#ClientName').change(function(){
   
           $.ajaxSetup({
        headers: {

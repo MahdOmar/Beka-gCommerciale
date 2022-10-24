@@ -61,7 +61,7 @@
 
         <div class="d-flex justify-content-end">
 
-            <p class="text-right"><u>Tlemcen, le {{ $Cais->created_at->format('d/m/Y') }}</u> </p>
+            <p class="text-right"><u>Tlemcen, le {{ $bank->created_at->format('d/m/Y') }}</u> </p>
 
         </div>
         <div class="text-center">
@@ -75,59 +75,32 @@
 
     <div class="body-section mt-5 ">
 
-        <h4 class="m-3 font-weight-bold"><i>Client:</i> &nbsp; &nbsp; &nbsp; <b>{{ $client->Name }}</b>    </h4>
+        <h4 class="m-3 font-weight-bold"><i>Client:</i> &nbsp; &nbsp; &nbsp; <b>{{ $bank->client->Name }}</b>    </h4>
       
-       @if ($caisse->Operation == "Encaissement de Bl")
-       <table class="table table-bordered table-hover text-center">
-        <thead>
-            <tr>
-                <th style="width: 30%">N° Operation</th>
-             
-                <th style="width: 40%">Montant</th>
-            </tr>
-
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{   str_pad($Cais->id, 3, '0', STR_PAD_LEFT)   }}</td>
-                <td> {{ number_format($Cais->Amount,2,'.',',')  }} </td>
-            </tr>
-
-            
-
-        </tbody>
-    </table>
-           
-       @else
-
-       <table class="table table-bordered table-hover text-center">
-        <thead>
-            <tr>
-                <th style="width: 20%">N° Facture</th>
-                <th style="width: 50%">Mode de Payment</th>
-                <th style="width: 30%">Montant </th>
-
-
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ \App\Models\Facture::where('id',$Cais->Bl_id)->value('Fac_num')   }}</td>
-
-                <td>Especes</td>
-              
-                <td> {{ number_format($caisse->Amount,2,'.',',')  }} </td>
-            </tr>
-
-            
-
-        </tbody>
-    </table>
-
-
-           
-       @endif
        
+        <table class="table table-bordered table-hover text-center">
+            <thead>
+                <tr>
+                    <th style="width: 20%">N° Facture</th>
+                    <th style="width: 50%">Mode de Payment</th>
+                    <th style="width: 30%">Montant </th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{  $bank->Fact_num  }}</td>
+
+                    <td>{{  $bank->Mode  }} de {{ number_format($bank->Total_Amount,2,'.',',') }} DA</td>
+                  
+                    <td> {{ number_format($bank->Fact_Amount,2,'.',',')  }} </td>
+                </tr>
+
+                
+
+            </tbody>
+        </table>
         <br>
 
        

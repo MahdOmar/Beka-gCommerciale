@@ -68,7 +68,6 @@ class BlDetailsController extends Controller
           $fd->Price_HT = $Bl->Price_HT / 1.19 ;
           $fd->Fac_id = $F_id[0]->Facture_id;
 
-          error_log('///////'.$fd);
           
           $fd->save();
 
@@ -123,7 +122,6 @@ class BlDetailsController extends Controller
 
         $Fd->Designation = request('Des');
       
-        error_log('///////////');
         $Fd->Quantity = request('Quantity');
       
 

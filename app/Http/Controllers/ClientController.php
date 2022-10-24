@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bank;
 use App\Models\Bl;
 use App\Models\Caisse;
 use App\Models\Client;
 use App\Models\Clientcredit;
-
+use App\Models\Facture;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\DB;
+use phpDocumentor\Reflection\PseudoTypes\True_;
 
 class ClientController extends Controller
 {
@@ -20,19 +22,14 @@ class ClientController extends Controller
       public function index(){
 
         $clients = Client::orderBy('created_at',"DESC")->paginate(10);
-    /*    $Etats = Client::select(
-          'clients.id',
-          'clients.Name',
-          'caisses.Amount',
-          
-          DB::raw('count( Distinct( caisses.Designation) )  as bls'),
-          DB::raw('SUM((caisses.Amount))  as pay'))
-        
-          ->leftJoin('caisses', 'caisses.ClientId', '=', 'clients.id')
-          ->groupBy('clients.id')
-          ->paginate(10);*/
+  
 
-          $caisses = Caisse::where('Operation','Encaissement de Facture/Bl')->get(); 
+          $caisses = Caisse::where('Operation','!=','Reglement de depenses')->get(); 
+          $rembo = Caisse::select( 'ClientId',DB::raw('SUM(Amount)  as total'))->where('Operation','Reglement de depenses')->groupBy('ClientId')->get(); 
+         
+       
+       
+          $banks = DB::table('banks')->select('Total_Amount','Mode','ClientId')->groupBy('Mode')->get();
           $allBl = Bl::select(
             'bls.ClientId',
          
@@ -40,6 +37,14 @@ class ClientController extends Controller
           
             ->groupBy('bls.ClientId')
             ->get();
+           
+            $allFactures = Facture::select(
+              'factures.ClientId',
+           
+              DB::raw('Count(factures.id)  as allFactures'))
+              ->where('Type','Normal')
+              ->groupBy('factures.ClientId')
+              ->get();
 
 
           $Bls = Bl::select(
@@ -48,18 +53,19 @@ class ClientController extends Controller
             DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
           
             ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+            
             ->groupBy('bls.ClientId')
             ->get();
 
- 
-            $credits = Clientcredit::all();
+
           
-            error_log($allBl);
+ 
+          
 
 
        
           return view('Clients.index',[ 'clients' => $clients,"caisses" =>$caisses,"allBl" =>$allBl,
-                                       'Bls' => $Bls , 'credits' => $credits  ]);
+                                       'Bls' => $Bls ,'banks' => $banks, 'rembo' => $rembo,'allFactures' =>$allFactures ]);
           
          
             }
@@ -82,7 +88,6 @@ class ClientController extends Controller
             ->groupBy('bls.id')
             ->get();
 
-            error_log('///////'.$Bds);
 
               
 

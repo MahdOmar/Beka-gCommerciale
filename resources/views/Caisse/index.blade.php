@@ -30,7 +30,8 @@
                 <label for="nameE" class="mb-2">Opération:</label>
                 <select name="nameE" id="Type" class="form-control form-select">
                   <option value="" disabled selected>Selectionner Type d'Opération</option>
-                  <option value="Encaissement de Facture/Bl" >Encaissement de Facture/Bl</option>
+                  <option value="Encaissement de Bl" >Encaissement Bl</option>
+                  <option value="Encaissement de Facture" >Encaissement de Facture</option>
                   <option value="Reglement de depenses" >Règlement de dépenses</option>
                 
                
@@ -74,7 +75,7 @@
              
              </div>
 
-           {{-- <div class="form-group m-2 F" style="display: none;">
+            <div class="form-group m-2 F" style="display: none;">
                 <label for="nameE" class="mb-2">Facture:</label>
                 <select name="nameE" id="Facture" placeholder="Native Select" data-search="false" data-silent-initial-value-set="true"  class="form-control  " multiple>
                
@@ -83,7 +84,7 @@
                 
                
                
-               </div> --}}
+               </div> 
       
 
             <div class="form-group m-2 D" style="display: none" >
@@ -131,7 +132,7 @@
         $total = 0 ;
            foreach($caisse as $cais)
             {
-              if($cais->Operation == "Encaissement de Facture/Bl")
+              if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl")
               {
                 $total = $total + $cais->Amount;
 
@@ -254,7 +255,7 @@
           <thead class="bg-dark text-white">
             <tr>
               
-            
+              <th>Num</th>
               <th>Operation</th>
               <th>Designation</th>
               <th>Montant</th>
@@ -265,8 +266,9 @@
 
             @foreach ($caisse as $item)
             <tr>
+              <td>{{ $item->id }}</td>
               <td>{{ $item->Operation }}</td>
-            @if ( $item->Operation == "Encaissement de Facture/Bl" )
+            @if ( $item->Operation == "Encaissement de Facture" || $item->Operation == "Encaissement de Bl" )
             <td>{{$item->Designation}}</td>
             @else
             <td>{{$item->Designation}}</td>
@@ -274,7 +276,7 @@
              
               <td>{{ number_format($item->Amount ,2,'.',',') }} </td>
 
-              @if ($item->Operation == 'Encaissement de Facture/Bl' )
+              @if ( $item->Operation == "Encaissement de Facture" || $item->Operation == "Encaissement de Bl" )
               <td> <a href="/dashboard/Caisse/{{$item->id}}/details" class="btn btn-success text-white"   role="button" >Details</a>
 
                   
@@ -634,7 +636,7 @@ $(function(){
         
           var type = $(this).val();
 
-          if( type == "Encaissement de Facture/Bl")
+          if( type == "Encaissement de Facture")
           {
             $('.F').show();
             $('.clients').show();
@@ -642,12 +644,19 @@ $(function(){
             $('.D').hide() ;
             
           }
+          else if(type == "Encaissement de Bl"){
+            $('.F').hide();
+            $('.clients').show();
+            $('.D').hide();
+            $('.regl').hide();
+
+
+          }
           else{
             $('.F').hide();
-            $('.clients').hide();
-            $('.D').show() ;
+            $('.clients').show();
+            $('.D').show();
             $('.regl').show();
-
 
           }
       
@@ -675,6 +684,7 @@ $('tbody').html('')
 
                   $('tbody').append('\
             <tr>\
+              <td>'+item.id+'</td>\
           <td>'+item.Operation+'</td>\
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
@@ -694,12 +704,11 @@ $('tbody').html('')
                 
                 $('tbody').append('\
             <tr>\
+              <td>'+item.id+'</td>\
           <td>'+item.Operation+'</td>\
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  disabled><i class="fas fa-edit"></i></button>\
             <a href="/dashboard/Caisse/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled ><i class="fas fa-trash"></i></button>\
      \
             </tr>')
 
@@ -713,6 +722,7 @@ $('tbody').html('')
 
               $('tbody').append('\
             <tr>\
+              <td>'+item.id+'</td>\
           <td>'+item.Operation+'</td>\
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
@@ -725,11 +735,10 @@ $('tbody').html('')
 
             $('tbody').append('\
             <tr>\
+              <td>'+item.id+'</td>\
           <td>'+item.Operation+'</td>\
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  disabled><i class="fas fa-edit"></i></button>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled ><i class="fas fa-trash"></i></button>\
      \
             </tr>')
 
@@ -744,6 +753,7 @@ $('tbody').html('')
             {
             $('tbody').append('\
             <tr>\
+              <td>'+item.id+'</td>\
           <td>'+item.Operation+'</td>\
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
@@ -760,7 +770,7 @@ $('tbody').html('')
           
              $.each(result.caisses, function(key, item){
 
-              if(item.Operation == "Encaissement de Facture/Bl")
+              if( item.Operation == "Encaissement de Facture" || item.Operation == "Encaissement de Bl")
               {
 
                 total = total + item.Amount;

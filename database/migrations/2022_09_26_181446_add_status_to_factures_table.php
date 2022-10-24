@@ -14,8 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('factures', function (Blueprint $table) {
-            $table->string('Fac_num')->after('id');
-
+            $table->string('Status');
         });
     }
 
@@ -27,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('factures', function (Blueprint $table) {
-            $table->dropColumn('Fac_num');
+            //
         });
     }
 };

@@ -4,7 +4,7 @@
 
 <div class="m-3">
 
-  <h4><a class="text-info" href="/dashboard/stats">Dashborad</a> / Caisse </h4>
+  <h4><a class="text-info" href="/dashboard/stats">Dashborad</a> / Banque </h4>
 
 
 </div>
@@ -24,8 +24,8 @@
         </div>
         <div class="card-body">
 
-          <p class="text-success success text-center"></p>
-           <p class="text-danger error text-center"></p>
+          <p class="text-success success fw-bold text-center"></p>
+           <p class="text-danger error fw-bold text-center"></p>
            
 
            
@@ -66,10 +66,10 @@
                <select name="nameE" id="Mode" class="form-control form-select">
                 <option value="" disabled selected> Selectionner Mode de paiement</option>
             
-              <option value="virement"> Versement à la banque</option>
-              <option value="versement"> Virement bancaire</option>
-              <option value="cheque">Chèque bancaire</option>
-              <option value="especes"> Espèces</option>
+              <option value="Versement à la banque"> Versement à la banque</option>
+              <option value="Virement bancaire"> Virement bancaire</option>
+              <option value="Chèque bancaire">Chèque bancaire</option>
+              <option value="Espèces"> Espèces</option>
 
 
                   
@@ -80,16 +80,16 @@
         </div>
       
 
-            <div class="form-group m-2 cheq"  style="display: none">
-                <label for="Des" class=" mb-2">Numéro de chèque:</label>
-                <input type="text" id="Des" class="form-control" name="Des"   required>
+            <div class="form-group m-2 cheq"  >
+                <label for="cheque" class=" mb-2">Numéro d'opétation:</label>
+                <input type="text" id="cheque" class="form-control" name="Des"   required>
                
                
            </div>
 
            <div class="form-group m-2 Date" >
-            <label for="Des" class=" mb-2">Date:</label>
-            <input type="date" id="Des" class="form-control" name="Des"   required>
+            <label for="Date_enc" class=" mb-2">Date:</label>
+            <input type="date" id="Date_enc" class="form-control" name="Des"   required>
            
            
        </div>
@@ -117,7 +117,7 @@
 
     <div class="card">
         <div class="card-header">
-            <h5 class="mt-2">la Caisse</h5>
+            <h5 class="mt-2">la Banque</h5>
 
            
             
@@ -128,7 +128,7 @@
           <img src="/img/bank.png" width="150" height="150" alt="">
         </div>
 
-          <h4 class="text-center" id="total">Total:   Da</h4>
+          <h4 class="text-center" id="total">Total: {{ number_format($total ,2,'.',',') }}   Da</h4>
         </div>
     </div>
   
@@ -228,6 +228,7 @@
   
   </div>
       
+
    
     
          <table class="table table-striped table-hover text-center mt-2 " >
@@ -235,61 +236,59 @@
             <tr>
               
             
-              <th>Operation</th>
-              <th>Designation</th>
-              <th>Montant</th>
+              <th>Client</th>
+              <th>Mode de Payment</th>
+              <th>Total Amount</th>
+              <th>Facture</th>
+              <th>Facture Amount</th>
+              <th>Date_enc</th>
+              <th>Date</th>
+
               <th>Options</th>
             </tr>
           </thead>
           <tbody>
-
-            {{-- @foreach ($caisse as $item)
+            @foreach ($banks as $bank)
             <tr>
-              <td>{{ $item->Operation }}</td>
-            @if ( $item->Operation == "Encaissement de Facture/Bl" )
-            <td>Bl N°{{$item->Designation}}</td>
+            <td>{{ $bank->client->Name }}</td>
+            <td>{{ $bank->Mode }}</td>
+            <td>{{ number_format($bank->Total_Amount ,2,'.',',') }}</td>
+            <td>{{ $bank->Fact_num }}</td>
+            <td>{{ number_format($bank->Fact_Amount ,2,'.',',') }}</td>
+            @if ($bank->Date_Enc > date("Y-m-d"))
+            <td class="text-danger">{{ $bank->Date_Enc }} </td>
+
             @else
-            <td>{{$item->Designation}}</td>
+            <td>{{ $bank->Date_Enc }} </td>
+
             @endif
-             
-              <td>{{ number_format($item->Amount ,2,'.',',') }} </td>
+            <td>{{ $bank->created_at->format('d-m-Y') }} </td>
+            @if ($bank->UserId == $user)
+            <td>
+              <a href="/dashboard/Bank/{{ $bank->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
 
-              @if ($item->Operation == 'Encaissement de Facture/Bl' )
-              <td> <a href="/dashboard/Caisse/{{$item->id}}/details" class="btn btn-success text-white"   role="button" >Details</a>
-
-                  
-              @else
-              @if ($user == $item->user->id)
-              <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation({{$item->id}})"  ><i class="fas fa-edit"></i></button>
+              
+            
+                   <button onclick="deleteOperation({{$bank->id}})" id="btn{{ $bank->id }}" class='btn btn-danger' ><i class="fas fa-trash"></i></button>
+         
+            </td>
                 
-                <button onclick="deleteOperation({{$item->id}})" id="btn{{$item->id}}" class="btn btn-danger" ><i class="fas fa-trash"></i></button>
-                @if (str_contains($item->Designation,'Remboursement Client'))
-                <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
-  
-                @endif
-                  
-              @else
-              @if (str_contains($item->Designation,'Remboursement Client'))
-             <td> <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
-             </td>
-              @endif
-                  
-              @endif
-              
-            
-              
-            
+            @else
+            <td>
+              <a href="/dashboard/Bank/{{ $bank->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
 
               
-                  
-              @endif
-             
-
-              
-
+            </td>
+                
+            @endif
+           
           </tr>
+
+
                 
-            @endforeach --}}
+            @endforeach
+
+        
 
           </tbody>
         </table>
@@ -304,6 +303,7 @@
 
 
 </div>
+
 
 
 
@@ -327,7 +327,7 @@ $(function(){
        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
      }
    });
-         if( ($('.D').is(":visible") && $('#Des').val() == '' &&$('#Treg').val() != "Client" ) || $('#price').val() == '' )
+         if($("#ClientName").val() == "" || $('#Facture').val() ==  "" || $('#Mode').val() == "" ||  $('#cheque').val() == "" || $("#Date_enc").val()=="" || $('#price').val() == "" )
          {
             $('.error').text("All fields are required");
               setTimeout(function() { $('.error').text('');
@@ -344,13 +344,14 @@ $(function(){
          
           var data = {
            
-            'Type': $('#Type').val(),
-            'Treg':$('#Treg').val(),
-            'Des': $('#Des').val(),
+           
+           
             'Price': $('#price').val(),
             'Client': $('#ClientName').val(),
-            'Bls': $('#Facture').val(),
-            'Price': $('#price').val()
+            'Factures': $('#Facture').val(),
+            'Mode': $('#Mode').val(),
+            'Num':$('#cheque').val(),
+            "Date":$('#Date_enc').val()
           
            
           }
@@ -358,33 +359,26 @@ $(function(){
             
       
           $.ajax({
-             url : '/dashboard/Caisse/depense',
+             url : '/dashboard/bank/create',
              data: data,
              type: 'post',
            //  contentType: "application/json; charset=utf-8",
              dataType: 'json',
              success: function(result)
              {
-              console.log('******'+result.Error);
-              if(result.Error)
+              if(result.error)
                {
                
-                $('.error').text("Montant superieur à Dette de Client ("+result.Error+")")
+                $('.error').text( result.error)
                 setTimeout(function() { $('.error').text('');}, 2000);
                }
             
            else 
            {
            
-            $('.success').text('Operation Added');
-             fetch(result)
-          
-           
-            $('#Des').val('');
-            $('#price').val('');
-           
-            setTimeout(function() { $('.success').text('');}, 1000);
-       
+            fetch(result)
+            setTimeout(function() { $('.success').text('');}, 2000);
+               
             
             
            }
@@ -520,7 +514,7 @@ $(function(){
         if (value) {
        
        $.ajax({
-             url : '/dashboard/Caisse/delete',
+             url : '/dashboard/bank/delete',
              data:{'id':id},
              type: 'delete',
            //  contentType: "application/json; charset=utf-8",
@@ -528,7 +522,22 @@ $(function(){
              success: function(result)
              {
             
-            fetch(result);
+              $("#btn"+id).closest("tr").remove();
+              total = 0;
+          
+             $.each(result.banks, function(key, item){
+
+             
+
+                total = total + item.Total_Amount;
+
+              
+
+             })
+           
+           
+
+             $("#total").text('Total: '+total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' Da' )
           
              },
              error: function()
@@ -598,7 +607,7 @@ $(function(){
            
           }
           else{
-            $('.cheq').hide();
+          
             $('.Date').show();
 
 
@@ -609,69 +618,73 @@ $(function(){
       
    });
    function fetch (result){
+
+    if(result.error)
+    {
+      $('.error').text(result.error);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return ;
+    }
+
+
 $('tbody').html('')
-            $.each(result.caisses, function(key, item){
+
+            $('.success').text("Operation Added");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            total = 0;
+            $.each(result.banks, function(key, item){
             
-            if(item.Operation == "Reglement de depenses")
-            {
-              $('tbody').append('\
-            <tr>\
-          <td>'+item.Operation+'</td>\
-          <td>'+item.Designation+'</td>\
-          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
-     \
-            </tr>')
-            }
-            else
-            {
-              if(result.user == item.User_id)
-              {
-              
-              $('tbody').append('\
-            <tr>\
-          <td>'+item.Operation+'</td>\
-          <td> Bon N°'+item.Designation+'</td>\
-          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td> <a href="/dashboard/Caisse/'+item.id+'/details" class="btn btn-success text-white"   role="button" >Details</a>\
-            <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
-                <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
-            </tr>')
- 
-          }
-          else{
-             
+            
+            
+              var dateString = moment(item.Date_Enc).format('DD-MM-YYYY');
+              var dateString2 = moment(item.created_at).format('DD-MM-YYYY');
+
+        
+              total = total + item.Amount;
+
+              if(result.user == item.UserId)
+                {
+
             $('tbody').append('\
             <tr>\
-          <td>'+item.Operation+'</td>\
-          <td> Bon N°'+item.Designation+'</td>\
-          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-          <td> <a href="/dashboard/Caisse/'+item.id+'/details" class="btn btn-success text-white"   role="button" >Details</a>\
-            </tr>')
-          }
-            }
-          total = 0;
+          <td>'+item.client.Name+'</td>\
+          <td>'+item.Mode+'</td>\
+          <td>'+item.Total_Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td> Facture N°'+item.Fact_num+'</td>\
+          <td>'+item.Fact_Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td>'+dateString+'</td>\
+          <td>'+dateString2+'</td>\
+          <td>               <a href="/dashboard/Bank/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>\
+             <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
+               </td>\    </tr>')
+
+              }
+
+              else{
+                $('tbody').append('\
+            <tr>\
+          <td>'+item.client.Name+'</td>\
+          <td>'+item.Mode+'</td>\
+          <td>'+item.Total_Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td> Facture N°'+item.Fact_num+'</td>\
+          <td>'+item.Fact_Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td>'+dateString+'</td>\
+          <td>'+dateString2+'</td>\
+          <td>               <a href="/dashboard/Bank/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>\
+               </td>\    </tr>')
+
+              }
+
+
+
+                  
           
-             $.each(result.caisses, function(key, item){
-              if(item.Operation == "Encaissement de Facture/Bl")
-              {
-                total = total + item.Amount;
-              }
-              else{ 
-                total = total - item.Amount;
-              }
-              
-             })
-             $.each(result.Credits, function(key, item){
-              total = total + item.Amount;
-             })
-           
             
-             $("#total").text('Total: '+total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' Da' )
+           }) 
           
-    
-           })
+          
+           $("#total").text('Total: '+result.total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' Da' )
+
 }
 $(function(){
        

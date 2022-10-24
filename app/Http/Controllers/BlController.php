@@ -31,39 +31,7 @@ class BlController extends Controller
         $Clients = Client::all();
         
 
-        foreach($Bls as $bl)
-        {
-          $total = 0;
-          foreach($Bds as $bd)
-          {
-            if($bd->Bl_id == $bl->id)
-            {
-              $total = $total + $bd->Price_HT *  $bd->Quantity;
-            }
-          }
-
-          foreach ($Payments as $pay)
-          {
-            if ($pay->Designation == $bl->id)
-            {
-          
-              
-              if($pay->Amount == $total)
-              {
-               
-                   error_log("payé");
-
-              }
-              else{
-                
-                error_log('non payé');
-              }
-            }
-            
-          }
-          
-
-        }
+        
 
        
 
@@ -93,7 +61,6 @@ class BlController extends Controller
               
            
               if ( date('Y-m-d') == date('2013-01-01') ){
-               error_log('*//////////*');
                   $nextInvoiceNumber = date('Y').'/1';
               } else {
                   //increase 1 with last invoice number
@@ -252,7 +219,6 @@ class BlController extends Controller
 
               }*/
 
-              error_log('//////////////////////////');
 
               $Cais = Caisse::where('Designation',request('id'))->get();
 

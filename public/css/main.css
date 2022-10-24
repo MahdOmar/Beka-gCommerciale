@@ -154,7 +154,7 @@ select {
 
 .side-bar {
     min-width: 20%;
-    height: 800px;
+    min-height: 100%;
 }
 
 .side-bar ul {

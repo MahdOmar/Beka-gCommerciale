@@ -40,9 +40,17 @@
 $totalCais = 0 ;
 $enc = 0 ;
 $reg = 0;
+$bank =0;
+
+  foreach ($banks as $item) {
+    if($item->Date_Enc <= date("Y-m-d"))
+    $bank += $item->Total_Amount;
+  }
+
+
    foreach($Payments as $cais)
     {
-      if($cais->Operation == "Encaissement de Facture/Bl")
+      if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl")
       {
         $totalCais = $totalCais + $cais->Amount;
         $enc = $enc + $cais->Amount;
@@ -57,9 +65,12 @@ $reg = 0;
 
 
 
+
       
 
     }
+
+    $enc += $bank;
 
     $totalbdl = 0 ;
 
@@ -71,94 +82,73 @@ foreach ($Bds as $Bd)
      
 }
 
-$totalCaisse = 0;
-foreach($Payments as $cais)
-    {
-      if($cais->Operation == "Encaissement de Facture/Bl")
-      {
-        $totalCaisse = $totalCaisse + $cais->Amount;
-      
-      }
-    }
 
- ///////   /// Total Créance 
+
     $dettes = 0 ;
 
+ 
   
-      foreach ($Clinets as $client) {
-        $total = 0;
-       foreach ($bls as $bl  ) {
-        if($bl->ClientId == $client->id)
-        {
-          
-        foreach ($Bds as $bd ) {
-          if($bd->Bl_id == $bl->id)
-          {
-            $total = $total + $bd->Price_HT *  $bd->Quantity;
-
-          }
-          
-        }
-        
-
-        }
-
-
-
-       }
-
-       foreach ($Payments as $cais ) {
-        if($cais->ClientId == $client->id)
-        {
-          if($cais->Amount > $total)
-          {
-            $dettes = $dettes + ($cais->Amount - $total);
-          }
-        }
-       }
-
-      }
 
 
   //*/************* Creance *----------------------/
-  
-  $creances = 0 ;
+ /* $creances = 0 ;
 
   
-foreach ($Clinets as $client) {
+
+  
   $total = 0;
- foreach ($bls as $bl  ) {
-  if($bl->ClientId == $client->id)
-  {
-    
+
   foreach ($Bds as $bd ) {
-    if($bd->Bl_id == $bl->id)
     {
-      $total = $total + $bd->Price_HT *  $bd->Quantity;
+      $total +=  ($bd->Price_HT *  $bd->Quantity);
 
     }
+
     
   }
+  $total_tax =0;
+
+  foreach($Payments as $cais)
+          {
+            if($cais->Operation == "Encaissement de Facture")
+            {
+
+           
+            $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
+              foreach($caisdetails as $details)
+              {
+                $total_tax += $details->Amount /1.01 * 0.01;
+
+                
+              }
+            }
+            
+          }
+
+          $amount_remb = 0;
+          foreach ($rembo as $item) {
+
+            if($item->ClientId != 0)
+            {
+              $amount_remb += $item->total;
+
+            }
+            
+
+
+            
+          }
+
+     $creances = ($total + $total_tax) - ($enc - $amount_remb) ;
+     if($creances < 0 ){
+      $creances = 0;
+     }
+
+     */
   
 
-  }
 
-
-
- }
-
- foreach ($Payments as $cais ) {
-  if($cais->ClientId == $client->id)
-  {
-    if($cais->Amount < $total)
-    {
-      $creances = $creances + ($total - $cais->Amount );
-    }
-  }
- }
-
-}
-
+/**                    */
 
       
     $factured = count($Facture);
@@ -171,8 +161,88 @@ foreach ($Clinets as $client) {
    
 
 @endphp
+@php
+          $total_romb = 0;
+          $creances = 0;
+          $left = 0;
 
-  
+foreach ($Clients as $client) {
+      $total_payed = 0;
+      $total_tax = 0;
+          foreach($Payments as $cais)
+          {
+            if ($cais->ClientId == $client->id)
+            {
+              if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl")
+              {
+                $total_payed += $cais->Amount;
+
+              }
+              if($cais->Operation == "Encaissement de Facture")
+            {
+              $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
+              foreach($caisdetails as $details)
+              {
+                $total_tax += $details->Amount /1.01 * 0.01;
+
+                
+              }
+            }
+            }
+          }
+
+          foreach($banks as $item)
+          {
+            if ($item->ClientId == $client->id)
+            {
+              $total_payed = $total_payed + $item->Total_Amount;
+              
+            }
+          }
+
+          $total_left = 0;
+          foreach ($rembo as $item) {
+            if($item->ClientId == $client->id )
+            {
+              $total_payed -= $item->total;
+
+
+            }
+          }
+
+
+          foreach($tbls as $bl)
+          {
+            if($bl->ClientId == $client->id)
+            {
+              $total_left = $bl->total + $total_tax - $total_payed;
+              
+            }
+          }
+
+          if($total_left < 0)
+          {
+            $dettes += -$total_left;
+          
+
+          }
+          else{
+            $creances += $total_left;
+
+
+          }
+          
+
+         
+
+
+
+
+}
+     
+    
+@endphp
+
   
   
         <div class="col-md-4 col-xl-4">
@@ -249,7 +319,7 @@ foreach ($Clinets as $client) {
             <div class="card-body pb-0">
                 <div class="row">
                     <div class="col-md-8">
-                        <h1 class="m-0">{{ count($Clinets)}}</h1><br>
+                        <h1 class="m-0">{{ count($Clients)}}</h1><br>
 
                     </div>
                     <div class="col-md-4 cl">
@@ -269,7 +339,7 @@ foreach ($Clinets as $client) {
                         <span>Créance</span>
                     </div>
                     <div class="col">
-                        <h4 class="m-0 text-white">{{ number_format( $dettes,2,'.',',') }} DA</h4>
+                        <h4 class="m-0 text-white">{{ number_format($dettes  ,2,'.',',') }} DA</h4>
                         <span>Dettes</span>
                     </div>
                    
@@ -300,7 +370,7 @@ foreach ($Clinets as $client) {
                 <div class="row">
                   <div class="col">
                     <h5 class="card-title text-uppercase  mb-0">Caisse</h5>
-                    <span class="h2 font-weight-bold mb-0">{{ number_format($totalCais+$credit[0]->total,2,'.',',')  }} DA </span>
+                    <span class="h2 font-weight-bold mb-0">{{ number_format($totalCais,2,'.',',')  }} DA </span>
                   </div>
                  
                 </div>
@@ -314,8 +384,8 @@ foreach ($Clinets as $client) {
               <div class="card-body text-white">
                 <div class="row">
                   <div class="col">
-                    <h5 class="card-title text-uppercase  mb-0">Encaissemets</h5>
-                    <span class="h2 font-weight-bold mb-0">{{ number_format($enc,2,'.',',') }} DA</span>
+                    <h5 class="card-title text-uppercase  mb-0">Bank</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ number_format($bank,2,'.',',') }} DA</span>
                   </div>
                   
                 </div>
@@ -345,8 +415,8 @@ foreach ($Clinets as $client) {
               <div class="card-body text-white">
                 <div class="row">
                   <div class="col">
-                    <h5 class="card-title text-uppercase  mb-0">Dettes</h5>
-                    <span class="h2 font-weight-bold mb-0"> {{ number_format(  $dettes,2,'.',',') }} DA</span>
+                    <h5 class="card-title text-uppercase  mb-0">Total</h5>
+                    <span class="h2 font-weight-bold mb-0"> {{ number_format( $totalCais + $bank ,2,'.',',') }} DA</span>
                   </div>
                 
                 </div>
@@ -499,8 +569,8 @@ $(document).ready(function(){
 
 <script>
   $(document).ready(function(){
-    var  comp =  <?php echo json_encode(count($Facture))?>;
-    var pen =  <?php echo json_encode(count($bls) - count($Facture))?>;
+    var  reg =  <?php echo json_encode($reg)?>;
+    var enc =  <?php echo json_encode($enc)?>;
 
     let barchart = new Chart('doughnut_chart',{
         type:'doughnut',
@@ -510,7 +580,7 @@ $(document).ready(function(){
                 {
                     label:'Points',
                     backgroundColor:['#00FF00','#FF0000'],
-                    data:[comp,pen]
+                    data:[enc,reg]
                 }
             ]
         }

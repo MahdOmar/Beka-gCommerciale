@@ -117,7 +117,13 @@ Route::get('/dashboard/Caisse/{id}/print',[CaisseController::class, 'remob']);
 
 
 Route::get('/dashboard/Bank', [BankController::class, 'index']);
+Route::post('/dashboard/bank/create', [BankController::class, 'store']);
+Route::delete('/dashboard/bank/delete',[BankController::class, 'destroy']);
+
+
 Route::get('/dashboard/Bank/facture', [BankController::class, 'factures']);
+Route::get('/dashboard/Bank/{id}/print',[BankController::class, 'print']);
+
 
 
 

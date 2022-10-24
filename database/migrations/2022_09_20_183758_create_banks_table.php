@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('banks', function (Blueprint $table) {
             $table->id();
-            $table->foreign('ClientId');
-            $table->foreign('Fact_num');
+            $table->foreignId('ClientId');
+            $table->string('Fact_num');
             $table->string('Mode');
             $table->double('Total_Amount');
             $table->double('Fact_Amount');

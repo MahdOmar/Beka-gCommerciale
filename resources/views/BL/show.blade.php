@@ -81,10 +81,10 @@
     <div class="brand-section d-flex">
         <div >
            
-                <img src="/img/log.png" alt="">
+                <img width="220" height="83" src="/img/log.png" alt="">
         </div>
         <div class="bg-white" style="font-size:14px; max-height:95px">
-            <p class="mt-4 ml-2" style="line-height: 1.2;  ">Lot. 06, ilot 02, Z.A. Hennaya <br>
+            <p class="mt-3 ml-2" style="line-height: 1.2;  ">Lot. 06, ilot 02, Z.A. Hennaya <br>
             Tlemcen 13550 - ALGERIE <br>
             Tél.: 043 434 434 fax: 043 434 435 <br>
             <b>www.beka-imprimerie.com</b>

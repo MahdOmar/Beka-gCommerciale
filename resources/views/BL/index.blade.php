@@ -85,7 +85,6 @@
            <!--   <button class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#trans"  disabled><i class="fa-solid fa-rotate"></i></button>
            -->
                   
-                   <button onclick="deleteBl({{ $bl->id }})" id="btn{{ $bl->id }}" class='btn btn-danger' disabled><i class="fas fa-trash"></i></button>
          
                  
              </tr>
@@ -737,58 +736,15 @@ function fetch (result){
 
   $('tbody').html('')
 
-  $.each(result.bls, function(key, item){
-
-   
-
+    
           
-          
-    total = 0 ;
-    $.each(result.Bds, function(key, Bd){
+    
+
+
+    $.each(result.bls, function(key, item){
      
 
-      if(Bd.Bl_id == item.id)
-               {
-                
-                 total = total + Bd.Price_HT *  Bd.Quantity;
-                 console.log('dkhelt'+total);
-               }
-
-
-    })
-
-    comp = 0;
-
-    console.log(total+'*******');
-
-
-    $.each(result.Payments, function(key, pay){
-     
-
-      if (pay.Designation == item.id)
-      {
-        if (pay.Amount == total)
-        {
-          Spay = "Payé"
-        }
-        else{
-          Spay = "Non Payé"
-        }
-      }
-      else{
-        comp++ 
-
-      }
-             
-
-
-    })
-
-    if(comp == result.Payments.length)
-    {
-      Spay = "Non Payé"
-    }
-
+      
             
 
                 var dateString = moment(item.created_at).format('DD-MM-YYYY');
@@ -803,7 +759,6 @@ function fetch (result){
             <td>Bl N°'+item.Bl_num+'</td>\
             <td>'+item.client.Name+'</td>\
             <td>'+item.Status+'</td>\
-            <td>'+Spay+'</td>\
             <td>'+dateString+' </td>\
             <td>'+item.user.name+' </td>\
             <td> \
@@ -821,12 +776,10 @@ function fetch (result){
             <td>'+item.id+'</td>\
             <td>'+item.client.Name+'</td>\
             <td>'+item.Status+'</td>\
-            <td>'+Spay+'</td>\
             <td>'+dateString+' </td>\
             <td>'+item.user.name+' </td>\
             <td> \
            <a href="/dashboard/BL/'+item.id+'/details" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>\
-                <button onclick="deleteBl('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled><i class="fas fa-trash"></i></button>\
        \
               </tr>')
 
