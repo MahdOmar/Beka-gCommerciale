@@ -32,7 +32,9 @@
                   <option value="" disabled selected>Selectionner Type d'Opération</option>
                   <option value="Encaissement de Bl" >Encaissement Bl</option>
                   <option value="Encaissement de Facture" >Encaissement de Facture</option>
+                  <option value="Autre Encaissement" >Autre Encaissement</option>
                   <option value="Reglement de depenses" >Règlement de dépenses</option>
+
                 
                
              </select>    
@@ -132,7 +134,8 @@
         $total = 0 ;
            foreach($caisse as $cais)
             {
-              if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl")
+              if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl"
+              ||$cais->Operation == "Autre Encaissement" )
               {
                 $total = $total + $cais->Amount;
 
@@ -652,6 +655,16 @@ $(function(){
 
 
           }
+
+          else if(type == "Autre Encaissement"){
+            $('.F').hide();
+            $('.clients').hide();
+            $('.D').show();
+            $('.regl').hide();
+
+          }
+
+
           else{
             $('.F').hide();
             $('.clients').show();
@@ -708,7 +721,7 @@ $('tbody').html('')
           <td>'+item.Operation+'</td>\
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-            <a href="/dashboard/Caisse/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>\
+            <td><a href="/dashboard/Caisse/'+item.id+'/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a></td>\
      \
             </tr>')
 
@@ -727,7 +740,7 @@ $('tbody').html('')
           <td>'+item.Designation+'</td>\
           <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
           <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
-            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
+            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button></td>\
      \
             </tr>')
           }
@@ -748,6 +761,44 @@ $('tbody').html('')
           }
             }
             
+
+           else if(item.Operation == "Autre Encaissement" )
+           {
+             if(result.user == item.UserId){
+          
+        
+
+              $('tbody').append('\
+            <tr>\
+              <td>'+item.id+'</td>\
+          <td>'+item.Operation+'</td>\
+          <td>'+item.Designation+'</td>\
+          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+          <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation('+item.id+')"  ><i class="fas fa-edit"></i></button>\
+            <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button></td>\
+     \
+            </tr>')
+          }
+          else{
+
+            $('tbody').append('\
+            <tr>\
+              <td>'+item.id+'</td>\
+          <td>'+item.Operation+'</td>\
+          <td>'+item.Designation+'</td>\
+          <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+     \
+            </tr>')
+
+
+          }
+
+
+
+
+
+           }
+
 
             else
             {
@@ -770,7 +821,8 @@ $('tbody').html('')
           
              $.each(result.caisses, function(key, item){
 
-              if( item.Operation == "Encaissement de Facture" || item.Operation == "Encaissement de Bl")
+              if( item.Operation == "Encaissement de Facture" || item.Operation == "Encaissement de Bl"
+                || item.Operation == "Autre Encaissement" )
               {
 
                 total = total + item.Amount;

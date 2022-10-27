@@ -151,7 +151,16 @@ class FactureController extends Controller
         $fd = new Fdetails();
         $fd->Designation = $Bd->Designation;
         $fd->Quantity = $Bd->Quantity;
-        $fd->Price_HT = $Bd->Price_HT / 1.19;
+        if($Bl->Factured == "Oui")
+        {
+          $fd->Price_HT = $Bd->Price_HT ;
+
+
+        }
+        else{
+          $fd->Price_HT = $Bd->Price_HT / 1.19;
+
+        }
         $fd->Fac_id = $Fac->id;
 
         $fd->save();

@@ -70,6 +70,8 @@ class BlController extends Controller
 
               $Bl->Bl_num = $nextInvoiceNumber;
   
+              $Bl->Factured= request('Factured');
+
               $Bl->ClientId= request('ClientName');
               $Bl->Status = 'Not Factured';
            
@@ -194,6 +196,7 @@ class BlController extends Controller
               {
                 return response()->json([
                   "error"=>'Bl déja Factured',
+
                 
                 ]);
 

@@ -100,7 +100,7 @@ class CaisseController extends Controller
               
               ->groupBy('bls.ClientId')
               ->get();
-
+              
               $total_payed = 0;
               $total_tax = 0;
           foreach($caisses_pay as $cais)
@@ -140,7 +140,7 @@ class CaisseController extends Controller
          
 
            
-            if(abs(request('Price') - ($total_credit - $rembo[0]->total) < 0.001 ))
+            if(abs(request('Price') - ($total_credit - $rembo[0]->total) > 1 ))
             {
               return response()->json([
                 "Error"=>"Montant superieur a Credit",
@@ -186,6 +186,37 @@ class CaisseController extends Controller
         
 
         }
+
+        /******* Autre Encaissement */
+        if(request('Type') == "Autre Encaissement")
+        {
+
+        $caisse = new Caisse();
+        $caisse->Operation = request('Type');
+        $caisse->Designation = request('Des');
+        $caisse->Amount = request('Price');
+        $caisse->UserId = Auth::id();
+        $caisse->ClientId = 0;
+        $user = Auth::id();
+        
+        
+         $caisse->save();
+         $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
+
+                
+         return response()->json([
+           "user" => $user,
+           "caisses" => $caisses
+     
+         ]);
+
+        }
+
+
+
+
+        /******* End Autre Encaissement */
+
 
         /******* Encaissement de Factures */
 

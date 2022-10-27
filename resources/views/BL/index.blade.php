@@ -117,70 +117,6 @@
 </div>
 <!-- Transorm Model  -->
 
-
-<div id="trans" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-md">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-          <h4 class="modal-title">Transform</h4>
-         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        
-      </div>
-      <div class="modal-body">
-    
-         <p class="text-success success text-center"></p>
-         <p class="text-danger error text-center"></p>
-         <input type="hidden" id="idBl">
-
-         <div class="form-group m-2">
-          <label for="nameE" class="mb-2">Facture:</label>
-          <select name="nameE" id="FacType" class="form-control form-select">
-            <option value="" disabled selected>Selectionner Type De Facture</option>
-            <option value="Facture Proforma">Facture Proforma</option>
-            <option value="Facture Normal" >Facture Normal</option>
-
-
-
-         
-         
-       </select>    
-          
-         
-         
-         </div>
-
-
-
-  
-      </div>
-      <div class="modal-footer">
-          <button
-          type="button"
-          class="btn btn-danger"
-          data-bs-dismiss="modal"
-        >
-          Fermer
-        </button>
-        <div class="form-group">
-        <button  class="btn btn-dark transform">Valider </button>
-        </div> 
-      </div>
-    </form>
-    </div>
-
-  </div>
-</div>
-
-
-
-
-
-
-
-
 <div id="myModal" class="modal fade" role="dialog">
   <div class="modal-dialog modal-md">
 
@@ -208,8 +144,17 @@
          
        </select>    
           
-         
-         
+         </div>
+
+         <div class="form-group m-2">
+          <label for="bl_f" class="mb-2">Facturation:</label>
+          <select name="nameE" id="bl_f" class="form-control form-select">
+            <option value="" disabled selected>Selectionner Oui/Non </option>
+            <option value="Oui">Oui</option>
+            <option value="Non" >Non</option>
+
+       </select>    
+          
          </div>
 
 
@@ -338,10 +283,10 @@ $(function(){
 
    console.log( $('#ClientName').val());
 
-      if( $('#ClientName').val()  == null)
+      if( $('#ClientName').val()  == null || $('#bl_f').val() == null)
       {
        
-        $('.error').text("Selectionner Client ");
+        $('.error').text("All fiels are required");
         
        
         setTimeout(function() { $('.error').text('');
@@ -359,6 +304,7 @@ $(function(){
           var data = {
             'date' : $('#date').val(),
             'ClientName': $('#ClientName').val(),
+            'Factured': $('#bl_f').val(),
           
            
           }
