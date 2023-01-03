@@ -145,6 +145,7 @@
 
       <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de la Caisse</a></li>
       <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li>
+      <li><a class="{{ (request()->segment(2) == 'Retour') ? 'active' : '' }}"  href="/dashboard/Retour"><i class="fa-solid fa-rotate-left"></i>Gestion de Retour</a></li>
 
      
 
@@ -205,7 +206,7 @@
               <thead class="bg-dark text-white">
                 <tr>
                   
-                  <th>Id</th>
+                  <th>Facture</th>
                   <th>Client Name</th>
                   <th>Type</th>
                   <th>Mode de Payment</th>
@@ -218,8 +219,11 @@
               <tbody>
       
                   @foreach ( $facs as $fac)
+                  @php
+                     $expNum = explode('/', $fac->Fac_num);
+                  @endphp
                   <tr>
-                    <td>{{ $fac->Fac_num }} </td>
+                    <td>Facture N°{{ $expNum[0] }}/{{  str_pad($expNum[1], 3, '0', STR_PAD_LEFT) }} </td>
                     <td>{{ $fac->client->Name }}</td>
                     <td>{{ $fac->Type }}</td>
                     <td>{{ $fac->ModePay }}</td>
@@ -245,7 +249,6 @@
                       <a href="/dashboard/Factures/{{ $fac->id }}/details" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
                       
                           
-                           <button onclick="deleteFacture({{ $fac->id }})" id="btn{{ $fac->id }}" class='btn btn-danger' disabled><i class="fas fa-trash"></i></button>
                  
                          
                      </tr>
@@ -939,7 +942,6 @@ crossorigin="anonymous"
               <td>'+item.user.name+' </td>\
               <td>\
              <a href="/dashboard/Factures/'+item.id+'/details" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>\
-                  <button onclick="deleteBl('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" disabled><i class="fas fa-trash"></i></button>\
          \
                 </tr>')
   

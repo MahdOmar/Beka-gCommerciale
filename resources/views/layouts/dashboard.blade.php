@@ -112,6 +112,7 @@
 
         <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de la Caisse</a></li>
         <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li>
+        <li><a class="{{ (request()->segment(2) == 'Retour') ? 'active' : '' }}"  href="/dashboard/Retour"><i class="fa-solid fa-rotate-left"></i>Gestion de Retour</a></li>
 
       
      

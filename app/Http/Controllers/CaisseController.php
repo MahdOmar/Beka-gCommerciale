@@ -19,9 +19,7 @@ use Illuminate\Support\Str;
 use App\Models\Bl;
 use App\Models\Caisdetails;
 use App\Models\Client;
-
-
-
+use App\Models\Retour;
 use Illuminate\Http\Request;
 use Prophecy\Call\Call;
 
@@ -37,7 +35,7 @@ class CaisseController extends Controller
 
       public function index(){
 
-       $caisse = Caisse::with('user')->orderBy('created_at','DESC')->paginate(10);
+       $caisse = Caisse::with('user')->orderBy('created_at','DESC')->get();
        $Credits = Clientcredit::all();
        $user =  Auth::id();
 
@@ -90,16 +88,29 @@ class CaisseController extends Controller
             $caisses_pay = Caisse::where('Operation','!=','Reglement de depenses')->where('ClientId',request('Client'))->get(); 
             $banks = Bank::where('ClientId',request('Client'))->get();
             $rembo = Caisse::select( DB::raw('SUM(Amount)  as total'))->where('Designation',"Remboursement Client ".$client->Name)->get(); 
+            $return = Retour::select( 'ClientId',DB::raw('SUM(Amount)  as rn'))->groupBy('ClientId')->get(); 
+
             $Bls = Bl::select(
               'bls.ClientId',
+               
+              
            
               DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
             
               ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-              ->where('ClientId',request('Client'))
-              
-              ->groupBy('bls.ClientId')
+              ->where('bls.Status','Not Factured')
+              ->where('bls.ClientId',request('Client'))
               ->get();
+
+              $Bls_fac = Bl::select(
+                'bls.ClientId',
+                 
+                DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+              
+                ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+                ->where('bls.Status','!=','Not Factured')
+                ->where('bls.ClientId',request('Client'))
+                ->get();
               
               $total_payed = 0;
               $total_tax = 0;
@@ -107,6 +118,9 @@ class CaisseController extends Controller
           {
             
               $total_payed += $cais->Amount;
+              if($cais->Operation == "Encaissement de Facture"){
+
+              
               $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
               foreach($caisdetails as $details)
               {
@@ -114,20 +128,31 @@ class CaisseController extends Controller
 
                 
               }
+            }
             
           }
           foreach($banks as $bank)
           {
             
               $total_payed = $total_payed + $bank->Fact_Amount;
+             
               
             
           }
+        
           $total_left = 0;
           $total_credit = 0;
         
-             $total_left = $Bls[0]->total + $total_tax - $total_payed;
-           
+          $total_left = $Bls[0]->total + $Bls_fac[0]->total + $Bls_fac[0]->total * 0.19  + $total_tax - $total_payed;
+
+          foreach($return as $rtn)
+              {
+                if($rtn->ClientId == request('Client') ){
+                  $total_left -= $rtn->rn;
+
+                }
+              }
+          
 
           if($total_left < 0)
           {
@@ -373,27 +398,42 @@ class CaisseController extends Controller
         }
         else
         {
+          $factures = request('Bls');
           
         $left_amount = request('Price');
 
         $caisse = new Caisse();
         $caisse->Operation = "Encaissement de Facture";
-        $caisse->Designation = "Payement de ".$client->Name;
-        $caisse->Amount = request('Price');
-         $caisse->UserId = Auth::id();
-         $caisse->ClientId = request('Client');
-         $caisse->save();
+        $caisse->Designation = "Payement de ".$client->Name." Facture: ";
 
-         $user = Auth::id();
-
-
-
-        $factures = request('Bls');
         foreach($factures as $item)
         {
 
 
           $facture = Facture::find($item);
+
+
+          $caisse->Designation .= $facture->Fac_num.", ";
+        }
+        $caisse->Amount = request('Price');
+        $caisse->UserId = Auth::id();
+        $caisse->ClientId = request('Client');
+        $caisse->save();
+
+         $user = Auth::id();
+
+
+
+     
+        foreach($factures as $item)
+        {
+
+
+          $facture = Facture::find($item);
+
+
+          $caisse->Designation .= $facture->Fac_num.", ";
+
 
           $factureDetails = Fdetails::where('Fac_id',$item)->get();
           $total = 0 ;
@@ -506,6 +546,7 @@ class CaisseController extends Controller
              $new_pay->save();
 
         }
+
 
         
 
@@ -686,7 +727,12 @@ class CaisseController extends Controller
 
     $Cais = Caisse::find( $caisse->Caisse_id);
     $Cais->Amount =  $Cais->Amount - $caisse->Amount;
-    if($Cais->Amount != 0 ){
+    
+
+    $caisse->delete();
+
+    $caissesD = Caisdetails::where('Caisse_id',$Cais->id)->get();
+    if(count($caissesD) != 0){
       $Cais->save();
 
     }
@@ -698,11 +744,6 @@ class CaisseController extends Controller
     }
 
 
-    
-
-   
-
-    $caisse->delete();
     $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
 
     $user =  Auth::id();

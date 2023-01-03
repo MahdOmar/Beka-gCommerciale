@@ -8,6 +8,7 @@ use App\Models\Caisse;
 use App\Models\Client;
 use App\Models\Clientcredit;
 use App\Models\Facture;
+use App\Models\Retour;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ class ClientController extends Controller
 
           $caisses = Caisse::where('Operation','!=','Reglement de depenses')->get(); 
           $rembo = Caisse::select( 'ClientId',DB::raw('SUM(Amount)  as total'))->where('Operation','Reglement de depenses')->groupBy('ClientId')->get(); 
-         
+          $return = Retour::select( 'ClientId',DB::raw('SUM(Amount)  as rn'))->groupBy('ClientId')->get(); 
        
        
           $banks = DB::table('banks')->select('Total_Amount','Mode','ClientId')->groupBy('Mode')->get();
@@ -47,15 +48,31 @@ class ClientController extends Controller
               ->get();
 
 
-          $Bls = Bl::select(
+          $Bls_fac = Bl::select(
             'bls.ClientId',
+             
+            
          
             DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
           
             ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-            
+            ->where('bls.Status','!=','Not Factured')
             ->groupBy('bls.ClientId')
             ->get();
+
+            $Bls = Bl::select(
+              'bls.ClientId',
+               
+              
+           
+              DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+            
+              ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+              ->where('bls.Status','Not Factured')
+              ->groupBy('bls.ClientId')
+              ->get();
+
+
 
 
           
@@ -65,7 +82,8 @@ class ClientController extends Controller
 
        
           return view('Clients.index',[ 'clients' => $clients,"caisses" =>$caisses,"allBl" =>$allBl,
-                                       'Bls' => $Bls ,'banks' => $banks, 'rembo' => $rembo,'allFactures' =>$allFactures ]);
+                                       'Bls' => $Bls ,'Bls_F'=>$Bls_fac,'banks' => $banks, 'rembo' => $rembo,'allFactures' =>$allFactures ,
+                                       'return' => $return]);
           
          
             }
@@ -184,6 +202,20 @@ class ClientController extends Controller
              
           }
 
+
+          public function clientdetails($id)
+          {
+
+            $Client = Client::find($id);
+            $bls = Bl::where('ClientId',$id)->get();
+
+
+
+            return view('Clients.clientDetails',compact(['Client','bls']));
+
+
+
+          }
 
 
 }

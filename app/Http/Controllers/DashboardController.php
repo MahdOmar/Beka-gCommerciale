@@ -12,7 +12,7 @@ use App\Models\Caisse;
 use App\Models\Facture;
 use App\Models\Fdetails;
 use App\Models\Clientcredit;
-
+use App\Models\Retour;
 use Illuminate\Support\Facades\DB;
 
 
@@ -29,6 +29,8 @@ class DashboardController extends Controller
         $Bds = Bldetails::all();
         $Payments = Caisse::all();
         $banks = DB::table('banks')->select('Total_Amount','Mode','ClientId','Date_Enc')->groupBy('Mode')->get();
+        $return = Retour::select( 'ClientId',DB::raw('SUM(Amount)  as rn'))->groupBy('ClientId')->get(); 
+
         $Facture = Bl::where('Status','!=','Not Factured')->get();
       
 
@@ -140,7 +142,7 @@ class DashboardController extends Controller
                        
                       
                      }*/
-
+ 
                
                      
 
@@ -155,7 +157,17 @@ $tbls = Bl::select(
   DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
 
   ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-  
+  ->where('bls.Status','Not Factured')
+  ->groupBy('bls.ClientId')
+  ->get();
+
+  $tbls_fac = Bl::select(
+  'bls.ClientId',
+
+  DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+
+  ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+  ->where('bls.Status','!=','Not Factured')
   ->groupBy('bls.ClientId')
   ->get();
 
@@ -164,71 +176,119 @@ $tbls = Bl::select(
 
   ///********************************* */
 
-  $total_payed = 0;
-  $total_tax = 0;
-  $dettes=0;
-      foreach($Payments as $cais)
-      {
-        if ($cais->ClientId == 2)
-        {
-          if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl")
-          {
-            $total_payed += $cais->Amount;
+  $total_romb = 0;
+  $creances = 0;
+  $left = 0;
+  $dettes = 0;
 
+  foreach ($clients as $client) {
+    $total_payed = 0;
+    $total_tax = 0;
+    $total_left = 0;
+    $total_romb = 0;
+        foreach($Payments as $cais)
+        {
+          if ($cais->ClientId == $client->id)
+          {
+            if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl")
+            {
+              $total_payed += $cais->Amount;
+
+            }
+            if($cais->Operation == "Encaissement de Facture")
+          {
+            $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
+            foreach($caisdetails as $details)
+            {
+              $total_tax += $details->Amount /1.01 * 0.01;
+
+              
+            }
           }
-          if($cais->Operation == "Encaissement de Facture")
-        {
-          $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
-          foreach($caisdetails as $details)
-          {
-            $total_tax += $details->Amount /1.01 * 0.01;
+          }
+        }
 
+        foreach($banks as $item)
+        {
+          if ($item->ClientId == $client->id)
+          {
+            $total_payed = $total_payed + $item->Total_Amount;
             
           }
         }
-        }
-      }
 
-      foreach($banks as $item)
-      {
-        if ($item->ClientId == 2)
+        foreach ($rembo as $item) {
+          if($item->ClientId == $client->id )
+          {
+            $total_romb += $item->total;
+
+
+          }
+        }
+
+        $total_payed -= $total_romb;
+
+
+         $total_bls =0;
+
+        foreach($tbls as $bl)
         {
-          $total_payed = $total_payed + $item->Total_Amount;
-          
-        }
-      }
+          if($bl->ClientId == $client->id)
+          {
+            $total_bls += $bl->total ;
+            
+          }
 
-      $total_left = 0;
-      foreach ($rembo as $item) {
-        if($item->ClientId == 2)
+         
+        }
+
+        foreach($tbls_fac as $bl)
         {
-          $dettes -= $item->total;
-          $total_payed -= $item->total;
+          if($bl->ClientId == $client->id)
+          {
+            $total_bls += $bl->total;
+            
+          }
 
-
+         
         }
-      }
 
 
-      foreach($tbls as $bl)
-      {
-        if($bl->ClientId == 2)
+        $total_left = $total_bls + $total_tax - $total_payed;
+
+
+        foreach($return as $rtn)
+            {
+              if($rtn->ClientId == $client->id ){
+                $total_left -= $rtn->rn;
+
+              }
+            }
+
+
+
+
+        if($total_left < 0)
         {
-          $total_left = $bl->total + $total_tax - $total_payed;
-          
+          $dettes += -$total_left;
+        
+
         }
-      }
-
-      if($total_left < 0)
-      {
-        $dettes += -$total_left;
-      
-
-      }
+        else{
+          $creances += $total_left;
+          error_log("Creances: ".$creances);
 
 
+        }
+        
+
+       
 
 
+
+
+}
+   
 
 
 
@@ -242,9 +302,10 @@ $tbls = Bl::select(
 
 
         return view('Dashboard.index',["bls" => $Bls,
-        "Bds" => $Bds , "Payments" => $Payments , 'Facture' => $Facture, 'tbls' =>$tbls,
+        "Bds" => $Bds , "Payments" => $Payments , 'Facture' => $Facture, 'tbls' =>$tbls,'tbls_f' =>$tbls_fac,
         "Normal" => $Normal , 'Proforma' => $Proforma , "Clients" =>$clients,'rembo' =>$rembo,
-        "credit" => $credits,'banks' => $banks, "salesData" => $datas ,'salesData2' => $datas2] );
+        "credit" => $credits,'banks' => $banks, "salesData" => $datas ,'salesData2' => $datas2,
+        'return'=>$return] );
 
       }
    

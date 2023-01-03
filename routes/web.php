@@ -14,6 +14,8 @@ use App\Http\Controllers\FactureController;
 use App\Http\Controllers\BlDetailsController;
 use App\Http\Controllers\FDetailsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RetourController;
+
 
 
 /*
@@ -46,6 +48,8 @@ Route::post('/dashboard/Bl/transform',[BlController::class, 'transform']);
 
 Route::get('/dashboard/Clients', [ClientController::class, 'index']);
 Route::get('/dashboard/Clients/{id}/Etat_details', [ClientController::class, 'details']);
+Route::get('/dashboard/Clients/{id}/Client_details', [ClientController::class, 'clientdetails']);
+
 
 Route::post('/dashboard/Clients', [ClientController::class, 'store']);
 Route::post('/dashboard/Client/update',[ClientController::class, 'update']);
@@ -132,7 +136,14 @@ Route::get('/dashboard/stats', [DashboardController::class, 'index']);
 
 
 
+/** Retour Routes *************** */
 
+
+Route::get('/dashboard/Retour', [RetourController::class, 'index']);
+Route::post('/dashboard/Retour/create', [RetourController::class, 'store']);
+
+Route::get('/dashboard/Bank/retour', [RetourController::class, 'bls']);
+Route::delete('/dashboard/Retour/delete',[RetourController::class, 'destroy']);
 
 
 

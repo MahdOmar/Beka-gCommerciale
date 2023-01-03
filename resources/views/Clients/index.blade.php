@@ -66,6 +66,8 @@
 
                 
                 <a href="" class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#myModal2"  role="button" onclick="getClient({{$client->id}})"><i class="fas fa-edit"></i></a>
+                <a href="/dashboard/Clients/{{ $client->id}}/Client_details" class="btn btn-info text-white" ><i class="fa-solid fa-circle-info"></i></a>
+
                 
 
                      <button onclick="deleteClient({{ $client->id }})" id="btn{{ $client->id }}" class='btn btn-danger' ><i class="fas fa-trash"></i></button>
@@ -183,15 +185,36 @@
       
      
       <th>Name</th>
-      <th>Total Bls</th>
-      <th>Total Factures</th>
+      <th>Bls</th>
+      <th>Factures</th>
+      <th>Total </th>
       <th>Paid</th>
       <th>Left</th>
       <th>Tax</th>
       <th>Credit</th>
+      <th>Retour</th>
+      <th>Rembourssement</th>
     </tr>
   </thead>
   <tbody id="tbody2">
+
+    @php
+        $TBl= 0;
+        $TFact= 0;
+        $TBls = 0;
+        $TPayed = 0;
+        $TLeft = 0;
+        $TTax = 0;
+        $TCredit = 0;
+        $TRetour = 0;
+        $TRembo = 0;
+
+
+        
+    @endphp
+
+
+
 
     @foreach ( $clients as $client)
    
@@ -206,6 +229,7 @@
       <td>{{ $item->allBl }} </td>
       @php
           $test_bls = true;
+          $TBl += $item->allBl;
       @endphp
           
       @endif
@@ -225,9 +249,12 @@
       <td>{{ $item->allFactures }} </td>
       @php
           $test_facs = true;
+          $TFact += $item->allFactures;
       @endphp
+      
           
       @endif
+      
       
           
       @endforeach
@@ -236,6 +263,44 @@
       <td>0</td>
 
       
+          
+      @endif
+
+      @php
+      $total =0;
+      @endphp
+      @if ($test_bls)
+      @foreach($Bls as $bl)
+      
+        @if($bl->ClientId == $client->id)
+        @php
+            $total += $bl->total;
+        @endphp
+        
+        @endif
+      
+      @endforeach
+
+      @foreach($Bls_F as $bl)
+      
+        @if($bl->ClientId == $client->id)
+        @php
+            $total += $bl->total + $bl->total * 0.19 ;
+        @endphp
+        
+        @endif
+      
+      @endforeach
+
+      <td>{{ number_format($total,2,'.',',') }}</td>
+
+      @php
+      $TBls += $total;
+          
+      @endphp
+      
+          
+      @else
           
       @endif
       
@@ -286,6 +351,8 @@
 
           $total_payed -= $total_romb;
 
+          $TPayed +=  $total_payed;
+
 
 
 
@@ -301,9 +368,18 @@
           {
             if($bl->ClientId == $client->id)
             {
-              $total_left = $bl->total + $total_tax - $total_payed;
+              $total_left = $total + $total_tax - $total_payed;
+            
+              
             }
           }
+          foreach($return as $rtn)
+              {
+                if($rtn->ClientId == $client->id ){
+                  $total_left -= $rtn->rn;
+
+                }
+              }
 
           if($total_left < 0)
           {
@@ -323,6 +399,9 @@
             }
           }
 
+          $TLeft += $total_left;
+          $TTax += $total_tax;
+          $TCredit += ($total_credit - $total_romb);
           
 
 
@@ -333,6 +412,53 @@
        <td>{{ number_format($total_tax,2,'.',',') }}</td>
        <td>{{ number_format($total_credit - $total_romb ,2,'.',',') }}</td>
 
+       @php
+           $test_rtn = false;
+       @endphp
+
+       @foreach ($return as $item)
+       @if ($item->ClientId == $client->id)
+       @php
+            $test_rtn = true;
+            $TRetour+= $item->rn;
+       @endphp
+
+       <td>{{ number_format($item->rn,2,'.',',') }}</td>
+       @break
+
+      
+           
+       @endif
+           
+       @endforeach
+
+       @if (!$test_rtn)
+       <td>{{ number_format(0,2,'.',',') }}</td>
+       @endif
+
+       @php
+       $test_rembo = false;
+   @endphp
+
+   @foreach ($rembo as $item)
+   @if ($item->ClientId == $client->id)
+   @php
+        $test_rembo = true;
+        $TRembo += $item->total;
+   @endphp
+
+   <td>{{ number_format($item->total,2,'.',',') }}</td>
+   @break
+
+  
+       
+   @endif
+       
+   @endforeach
+
+   @if (!$test_rembo)
+   <td>{{ number_format(0,2,'.',',') }}</td>
+   @endif
 
 
 
@@ -354,6 +480,25 @@
    
 
   </tbody>
+
+  <tfoot>
+    <tr>
+      <th>TOTAL</th>
+      <th>{{ $TBl }}</th>
+      <th>{{ $TFact }}</th>
+      <th>{{ number_format($TBls,2,'.',',') }}</th>
+      <th>{{ number_format($TPayed,2,'.',',') }}</th>
+      <th>{{ number_format($TLeft,2,'.',',') }}</th>
+      <th>{{ number_format($TTax,2,'.',',') }}</th>
+      <th>{{ number_format($TCredit,2,'.',',') }}</th>
+      <th>{{ number_format($TRetour,2,'.',',') }}</th>
+      <th>{{ number_format($TRembo,2,'.',',') }}</th>
+
+
+    </tr>
+  </tfoot>
+
+
  </table>
 </div> 
 
@@ -905,6 +1050,7 @@ function fetch (result){
             <td>'+item.Contact+'</td>\
             <td>  <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModalCenter'+item.id+'" title="view" data-placement="bottom" class="float-left btn  btn-warning text-white"><i class="fas fa-eye " ></i></a>\
                <button  class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#myModal2"   onclick="getClient('+item.id+')"><i class="fas fa-edit"></i></button>\
+               <a href="/dashboard/Clients/'+item.id+'/Client_details" class="btn btn-info text-white" ><i class="fa-solid fa-circle-info"></i></a>\
                 <button onclick="deleteClient('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
       </td> \
               </tr>')
