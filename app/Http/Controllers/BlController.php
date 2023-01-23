@@ -71,6 +71,7 @@ class BlController extends Controller
               $Bl->Bl_num = $nextInvoiceNumber;
   
               $Bl->Factured= request('Factured');
+              $Bl->BC= request('BC');
 
               $Bl->ClientId= request('ClientName');
               $Bl->Status = 'Not Factured';

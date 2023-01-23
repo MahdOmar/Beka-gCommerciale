@@ -10,15 +10,12 @@ use App\Models\Caisse;
 use App\Models\Caisdetails;
 use App\Models\Client;
 use App\Models\Clientcredit;
+use App\Models\Facture;
 use App\Models\Fbl;
 use App\Models\Fdetails;
 use App\Models\Fdbld;
-
-
-
-
-
-
+use App\Models\Retour;
+use Illuminate\Support\Facades\DB;
 
 class BlDetailsController extends Controller
 {
@@ -150,7 +147,151 @@ class BlDetailsController extends Controller
    
     $Bldetails = Bldetails::where('Bl_id',$id)->get();
 
-    return view('BL.show',compact('Bl'),compact('Bldetails'));
+
+    $caisses = Caisse::where('Operation','!=','Reglement de depenses')->where('ClientId',$Bl->ClientId)->get(); 
+          $rembo = Caisse::select( 'ClientId',DB::raw('SUM(Amount)  as total'))->where('Operation','Reglement de depenses')->where('ClientId',$Bl->ClientId)->groupBy('ClientId')->get(); 
+          $return = Retour::select( 'ClientId',DB::raw('SUM(Amount)  as rn'))->where('ClientId',$Bl->ClientId)->groupBy('ClientId')->get(); 
+       
+       
+          $banks = DB::table('banks')->select('Total_Amount','Mode','ClientId')->where('ClientId',$Bl->ClientId)->groupBy('Mode')->get();
+         
+
+          $Bls_fac = Bl::select(
+            'bls.ClientId',
+             
+            
+         
+            DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+          
+            ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+            ->where('bls.Status','!=','Not Factured')
+            ->where('bls.ClientId',$Bl->ClientId)
+            ->groupBy('bls.ClientId')
+            ->get();
+
+            $Bls = Bl::select(
+              'bls.ClientId',
+               
+              
+           
+              DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+            
+              ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+              ->where('bls.Status','Not Factured')
+              ->where('bls.ClientId',$Bl->ClientId)
+              ->groupBy('bls.ClientId')
+              ->get();
+
+           
+           // Total
+           
+           $total =0;
+           
+         
+           foreach($Bls as $bl)
+           {
+             
+                 $total += $bl->total;
+            
+           
+            }
+     
+           foreach($Bls_fac as $bl)
+           {
+            
+             
+                 $total += $bl->total + $bl->total * 0.19 ;
+           
+           
+           }
+//*******End Total ********** */     
+$total_payed = 0;
+$total_tax = 0;
+    foreach($caisses as $cais)
+    {
+      
+        $total_payed += $cais->Amount;
+        if($cais->Operation == "Encaissement de Facture")
+      {
+        $caisdetails = \App\Models\Caisdetails::where('Caisse_id',$cais->id)->get();
+        foreach($caisdetails as $details)
+        {
+          $total_tax += $details->Amount /1.01 * 0.01;
+
+          
+        }
+      }
+      
+    }
+    foreach($banks as $bank)
+    {
+     
+        $total_payed = $total_payed + $bank->Total_Amount;
+        
+      
+    }
+
+     $total_romb = 0;
+
+    foreach ($rembo as $item) {
+      
+        $total_romb += $item->total;
+
+
+      
+    }
+
+    $total_payed -= $total_romb;
+
+    /**************** */
+    $total_left = 0;
+        
+          foreach($Bls as $bl)
+          {
+            
+              $total_left = $total + $total_tax - $total_payed;
+            
+              
+            
+          }
+          foreach($return as $rtn)
+              {
+               
+                  $total_left -= $rtn->rn;
+
+                
+              }
+
+          if($total_left < 0)
+          {
+          
+            $total_left = 0;
+          
+
+          }
+          $sold =0;
+          $sold = $total_left;
+
+
+                   
+            
+            
+            
+            
+            
+                   
+
+
+
+
+
+
+
+
+
+
+
+    return view('BL.show',compact(['Bl','Bldetails','sold']));
     
   }
  

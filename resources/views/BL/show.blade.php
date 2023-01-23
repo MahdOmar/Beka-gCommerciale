@@ -52,6 +52,20 @@
 
 <body>
 
+    
+    <div class="form-group m-2 " style="position: fixed; right:40%">
+        <label for="sold" class="mb-2">Sold:</label>
+        <select name="sold" id="sold" class="form-control form-select">
+          <option value="" disabled selected>Selectionner Sold</option>
+          <option value="Avec">Avec Sold</option>
+          <option value="Sans" >Sans Sold</option>
+
+     </select>    
+        
+       </div>
+
+
+
         
             <div class="form-group m-2 " style="position: fixed; right:15%">
                 <label for="nameE" class="mb-2">Type Impression:</label>
@@ -142,7 +156,14 @@
             <tr>
                 <td class="text-start">{{$Bl->Designation}}</td>
                 <td>{{number_format($Bl->Quantity,0,'.',',')}} </td>
+                @if ($Bl->Colis == 0)
+                <td>-</td>
+
+                    
+                @else
                 <td>{{$Bl->Colis}} </td>
+
+                @endif
             
              
               <td class="text-end">{{ number_format($Bl->Price_HT,2,'.',',')}} </td>
@@ -163,7 +184,7 @@
                 <td style="border-bottom: 1px solid white;border-left: 1px solid white;"></td>
 
 
-                <td  class="text-end">TOTAL</td>
+                <td  class="text-start">TOTAL</td>
                 <td  class="text-end">{{ number_format($total  ,2,'.',',')  }} </td>
 
 
@@ -226,6 +247,7 @@
 <script>
 
 var userData = <?php echo json_encode($Bldetails)?>;
+var sold = <?php echo json_encode($sold)?>;
 
 $('#ImpType').change(function(){
 
@@ -245,8 +267,9 @@ if( type == "Avec")
 
              
               
-                
-               
+                if(item.Colis > 0)
+                {
+
                 $('tbody').append('\
               <tr>\
             <td  class="text-start">'+item.Designation+'</td>\
@@ -255,9 +278,23 @@ if( type == "Avec")
             <td  class="text-end">'+(item.Price_HT / 1.19).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
             <td  class="text-end">'+((item.Price_HT / 1.19) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
               </tr>')
+            }
+            else
+            {
+                $('tbody').append('\
+              <tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>-</td>\
+            <td  class="text-end">'+(item.Price_HT / 1.19).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+((item.Price_HT / 1.19) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>')
 
+
+            }
 
              })
+            
 
              $('tbody').append(' <tr>\
                 <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
@@ -290,17 +327,29 @@ $.each(userData, function(key, item){
 
 
 
-  
+    if(item.Colis > 0)
+    {
  
-  $('tbody').append('\
-<tr>\
-<td  class="text-start">'+item.Designation+'</td>\
-<td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
-<td>'+item.Colis+'</td>\
-<td></td>\
-<td></td>\
-</tr>')
+            $('tbody').append('\
+            <tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>'+item.Colis+'</td>\
+            <td></td>\
+            <td></td>\
+            </tr>')
+    }        
+    else{
+        $('tbody').append('\
+            <tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>-</td>\
+            <td></td>\
+            <td></td>\
+            </tr>')
 
+    }
 
 })
 
@@ -308,7 +357,7 @@ $('tbody').append(' <tr>\
   <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
   <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
   <td  style="border-bottom: 1px solid white ;"></td>\
-  <td  >TOTAL </td>\
+  <td class="text-start"  >TOTAL </td>\
   <td> </td>\
 </tr>')
 
@@ -323,6 +372,9 @@ else{
              
               
                 
+               if(item.Colis > 0)
+               {
+                
                
                 $('tbody').append('<tr>\
             <td  class="text-start">'+item.Designation+'</td>\
@@ -331,17 +383,62 @@ else{
             <td  class="text-end">'+(item.Price_HT ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
             <td  class="text-end">'+(item.Price_HT * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
               </tr>')
+               }
+               else
+               {
+                $('tbody').append('<tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td >'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>-</td>\
+            <td  class="text-end">'+(item.Price_HT ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+(item.Price_HT * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>')
+
+               }
+
+
             })
               $('tbody').append(' <tr>\
                 <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
                 <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
                 <td  style="border-bottom: 1px solid white ;"></td>\
-                <td  >TOTAL </td>\
+                <td class="text-start"  >TOTAL </td>\
                 <td  class="text-end">{{ number_format($total ,2,'.',',')  }} </td>\
               </tr>')
             
 
 }
+
+
+});
+
+$('#sold').change(function(){
+
+
+    
+var type = $(this).val();
+
+if(type == "Avec")
+{
+    $('tbody').append('<tr id="tsold">\
+        <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white ;"></td>\
+                <td class="text-start" >SOLD </td>\
+                <td  class="text-end">{{ number_format($sold ,2,'.',',')  }}</td>\
+                </tr>\
+    ')
+
+
+
+
+
+}
+else{
+    $('#tsold').remove();
+
+}
+
 
 
 });

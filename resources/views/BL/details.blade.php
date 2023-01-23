@@ -276,7 +276,7 @@
 
            }
 
-           else if(  $('#Colis').val() <= 0)
+           else if(  $('#Colis').val() < 0)
            {
              $('.error').text("Colis can not be 0 or negative");
 
@@ -462,7 +462,7 @@ $(function(){
 
            }
 
-           else if( $('#ColisE').val() <= 0  )
+           else if( $('#ColisE').val() < 0  )
            {
              $('.errore').text("Colis can not be negative");
 

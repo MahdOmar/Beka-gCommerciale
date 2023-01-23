@@ -46,6 +46,7 @@
             
             <th>Bl</th>
             <th>Client Name</th>
+            <th>N° BC</th>
             <th>Statut</th>
             <th>Date</th>
             <th>User</th>
@@ -62,6 +63,8 @@
           <tr>
             <td>Bl N°{{ $expNum[0] }}/{{  str_pad($expNum[1], 3, '0', STR_PAD_LEFT) }} </td>
             <td>{{ $bl->client->Name }}</td>
+            <td>{{ $bl->BC }}</td>
+
             <td>{{ $bl->Status }}</td>
 
             <td>{{ $bl->created_at->format('d-m-Y') }} </td>
@@ -145,6 +148,16 @@
        </select>    
           
          </div>
+
+         <div class="form-group m-2">
+          <label for="bc" class="mb-2">N° BC:</label>
+          <input type="text" id="Bc" class="form-control" name="bc"   required>
+
+          
+         </div>
+
+
+
 
          <div class="form-group m-2">
           <label for="bl_f" class="mb-2">Facturation:</label>
@@ -283,7 +296,7 @@ $(function(){
 
    console.log( $('#ClientName').val());
 
-      if( $('#ClientName').val()  == null || $('#bl_f').val() == null)
+      if( $('#ClientName').val()  == null || $('#Bc').val()  == null    ||$('#bl_f').val() == null)
       {
        
         $('.error').text("All fiels are required");
@@ -304,6 +317,7 @@ $(function(){
           var data = {
             'date' : $('#date').val(),
             'ClientName': $('#ClientName').val(),
+            'BC': $('#Bc').val(),
             'Factured': $('#bl_f').val(),
           
            
@@ -704,6 +718,7 @@ function fetch (result){
               <tr>\
             <td>Bl N°'+item.Bl_num+'</td>\
             <td>'+item.client.Name+'</td>\
+            <td>'+item.BC+'</td>\
             <td>'+item.Status+'</td>\
             <td>'+dateString+' </td>\
             <td>'+item.user.name+' </td>\
@@ -721,6 +736,7 @@ function fetch (result){
               <tr>\
             <td>'+item.id+'</td>\
             <td>'+item.client.Name+'</td>\
+            <td>'+item.BC+'</td>\
             <td>'+item.Status+'</td>\
             <td>'+dateString+' </td>\
             <td>'+item.user.name+' </td>\
