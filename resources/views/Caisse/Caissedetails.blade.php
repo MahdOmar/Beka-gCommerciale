@@ -50,7 +50,7 @@
               <td>{{  number_format($Caisse->Amount,2,'.',',') }}</td>
               <td>{{ $Caisse->created_at->format('d-m-Y') }} </td>
               <td>{{ $Caisse->user->name }} </td>
-              @if ($Caisse->user->id == $user)
+              @if ($Caisse->user->id == $user || Auth::user()->role == "admin")
   
               <td> 
                 <a href="/dashboard/Caissedetails/{{ $Caisse->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
@@ -323,7 +323,7 @@ $('tbody').html('')
               console.log(item.User_id);
 
             
-              if(result.user == item.UserId)
+              if(result.user == item.UserId || result.role == "admin")
               {
 
             $('tbody').append('\

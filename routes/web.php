@@ -139,7 +139,7 @@ Route::get('/dashboard/stats', [DashboardController::class, 'index']);
 /** Retour Routes *************** */
 
 
-Route::get('/dashboard/Retour', [RetourController::class, 'index']);
+Route::get('/dashboard/Bl/{id}/retour', [RetourController::class, 'index']);
 Route::post('/dashboard/Retour/create', [RetourController::class, 'store']);
 
 Route::get('/dashboard/Bank/retour', [RetourController::class, 'bls']);
@@ -147,3 +147,4 @@ Route::delete('/dashboard/Retour/delete',[RetourController::class, 'destroy']);
 
 
 
+Route::get('/dashboard/Bls/{id}/export', [BlController::class, 'export']);

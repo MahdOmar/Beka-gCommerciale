@@ -127,6 +127,9 @@
 
     <div class="body-section mt-5 ">
 
+      <h4 class="m-3 font-weight-bold"><i>Bon de commande N°:</i> &nbsp; &nbsp; &nbsp; <b>{{ $Bl->BC }}</b>    </h4>
+
+
         <h4 class="m-3 font-weight-bold"><i>Client:</i> &nbsp; &nbsp; &nbsp; <b>{{ $Bl->client->Name }}</b>    </h4>
       
        
@@ -146,29 +149,29 @@
                 @php
                 $total = 0;
             @endphp
-            @foreach($Bldetails as $Bl)
+            @foreach($Bldetails as $item)
 
             
             
             @php
-            $total = $total + ($Bl->Price_HT * $Bl->Quantity  )
+            $total = $total + ($item->Price_HT * $item->Quantity  )
         @endphp
             <tr>
-                <td class="text-start">{{$Bl->Designation}}</td>
-                <td>{{number_format($Bl->Quantity,0,'.',',')}} </td>
-                @if ($Bl->Colis == 0)
+                <td class="text-start">{{$item->Designation}}</td>
+                <td>{{number_format($item->Quantity,0,'.',',')}} </td>
+                @if ($item->Colis == 0)
                 <td>-</td>
 
                     
                 @else
-                <td>{{$Bl->Colis}} </td>
+                <td>{{$item->Colis}} </td>
 
                 @endif
             
              
-              <td class="text-end">{{ number_format($Bl->Price_HT,2,'.',',')}} </td>
+              <td class="text-end">{{ number_format($item->Price_HT,2,'.',',')}} </td>
               
-              <td class="text-end">{{ number_format($Bl->Price_HT * $Bl->Quantity ,2,'.',',')}}</td>
+              <td class="text-end">{{ number_format($item->Price_HT * $item->Quantity ,2,'.',',')}}</td>
             
 
           </tr>
@@ -198,7 +201,9 @@
         </table>
         <br>
 
-       
+       @if($retour)
+       <p><b>NB: </b>Vous avez un retour: {{ $retour->Designation }}</p>
+       @endif
 
 
        <p><b>Tranportateur:</b></p>
@@ -252,7 +257,9 @@ var sold = <?php echo json_encode($sold)?>;
 $('#ImpType').change(function(){
 
     console.log(userData)
+ var Bl = <?php echo json_encode($Bl)?>;
 
+ console.log(Bl)
         
 var type = $(this).val();
 
@@ -262,11 +269,69 @@ if( type == "Avec")
 
 
     $('tbody').html('')
+    if(Bl.Factured == "Oui") {
 
               $.each(userData, function(key, item){
 
-             
-              
+                
+                
+                if(item.Colis > 0)
+                {
+
+                $('tbody').append('\
+              <tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>'+item.Colis+'</td>\
+            <td  class="text-end">'+(item.Price_HT ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+((item.Price_HT ) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>')
+            }
+            else
+            {
+                $('tbody').append('\
+              <tr>\
+            <td  class="text-start">'+item.Designation+'</td>\
+            <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
+            <td>-</td>\
+            <td  class="text-end">'+(item.Price_HT ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+((item.Price_HT ) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>')
+
+
+            }
+
+             })
+            
+
+             $('tbody').append(' <tr>\
+                <td  style="border-bottom: 1px solid white;border-left: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white ;"></td>\
+                <td  class="text-start">TOTAL HT</td>\
+                <td  class="text-end">{{ number_format($total ,2,'.',',')  }} </td>\
+              </tr>\
+            <tr >\
+                <td  id="word" class="text-start" rowspan="2"  style="border: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;"></td>\
+                <td  class="text-start"> TVA </td>\
+                <td  class="text-end">{{ number_format($total * 0.19  ,2,'.',',')  }} </td>\
+              </tr>\
+              <tr >\
+                <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
+                <td  style="border-bottom: 1px solid white;border-left: 1px solid white"></td>\
+                <td class="text-start" class="text-end">TTC</td>\
+                <td  class="text-end" >{{ number_format($total + $total*0.19  ,2,'.',',')  }} </td>\
+              </tr>')
+} 
+
+else{
+
+    $.each(userData, function(key, item){
+
+                console.log("nnnnnnnnnnn");
+                
                 if(item.Colis > 0)
                 {
 
@@ -286,8 +351,8 @@ if( type == "Avec")
             <td  class="text-start">'+item.Designation+'</td>\
             <td>'+item.Quantity.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'</td>\
             <td>-</td>\
-            <td  class="text-end">'+(item.Price_HT / 1.19).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
-            <td  class="text-end">'+((item.Price_HT / 1.19) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+(item.Price_HT / 1.19 ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+            <td  class="text-end">'+((item.Price_HT /1.19 ) * item.Quantity).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
               </tr>')
 
 
@@ -301,7 +366,7 @@ if( type == "Avec")
                 <td  style="border-bottom: 1px solid white;border-right: 1px solid white"></td>\
                 <td  style="border-bottom: 1px solid white ;"></td>\
                 <td  class="text-start">TOTAL HT</td>\
-                <td  class="text-end">{{ number_format($total /1.19 ,2,'.',',')  }} </td>\
+                <td  class="text-end">{{ number_format($total/1.19 ,2,'.',',')  }} </td>\
               </tr>\
             <tr >\
                 <td  id="word" class="text-start" rowspan="2"  style="border: 1px solid white"></td>\
@@ -317,6 +382,10 @@ if( type == "Avec")
                 <td  class="text-end" >{{ number_format($total ,2,'.',',')  }} </td>\
               </tr>')
 
+
+
+
+}
   
 }
 else if( type == "Montant"){

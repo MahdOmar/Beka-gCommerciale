@@ -22,7 +22,11 @@
       </div>
 
   <div class="col-md-4">
+    <div class="d-flex align-items-center">
+    {{-- <a href="/dashboard/Bls/{{ request()->route('id') }}/export"  class="btn btn-success btn-sm  text-white" ><i class="fas fa-plus-square m-1"></i>Export</a> --}}
+
     <input type="text" name="search" class="form-control" id="searchP" placeholder="search" >
+</div>
   </div>
  
 
@@ -38,15 +42,18 @@
             
            
             <th class="w-25">BL</th>
-            <th class="w-50" >Items</th>
+            <th class="w-25" >Items</th>
             <th class="w-25" >Quantity</th>
+            <th class="w-25" >Price</th>
+
            
            
           </tr>
         </thead>
         <tbody>
             @php
-                $color = "orange"
+                $color = "orange";
+                $final_total = 0;
             @endphp
 
 
@@ -54,22 +61,40 @@
            
             @php
                 $bl_details = \App\Models\Bldetails::where('Bl_id',$bl->id)->get();
+                $total =0;
                 
             @endphp
             <tr class="m-1">
                 @if ($color == "orange")
                 <td  class="align-middle table-warning" rowspan="{{ count( $bl_details) }}">Bl N°{{$bl->Bl_num}}</td>
                 @foreach ($bl_details as $details)
+                @php
+
+                $total += $details->Quantity * $details->Price_HT;
+                
+                    
+                @endphp
                 <td class="table-warning">- {{ $details->Designation }}</td>
                 <td class="table-warning"> {{ $details->Quantity }}</td>
+                <td class="table-warning">{{ number_format($details->Price_HT,2,'.',',')}} </td>
+
             </tr>
                 @endforeach
                     
                 @else
                 <td  class="align-middle table-info" rowspan="{{ count( $bl_details) }}">Bl N°{{$bl->Bl_num}}</td>
                 @foreach ($bl_details as $details)
+                @php
+
+                $total += $details->Quantity * $details->Price_HT;
+               
+
+                    
+                @endphp
                 <td class="table-info">- {{ $details->Designation }}</td>
                 <td class="table-info"> {{ $details->Quantity }}</td>
+                <td class="table-info">{{ number_format($details->Price_HT,2,'.',',')}} </td>
+
             </tr>
                 @endforeach
                     
@@ -91,13 +116,29 @@
 
                     }
                 @endphp
+             @php
+                      $final_total += $total;
 
+                @endphp
+                <tr >
+                    <td colspan="2"></td>
+                    <td>Total HT</td>
+                    <td >{{ number_format($total,2,'.',',')}}</td>
+                </tr>
+                
+                    
+              
+                
 
         
                 
             @endforeach
 
-         
+            <tr >
+                <td colspan="2"></td>
+                <td>Final Total HT  </td>
+                <td>{{ number_format($final_total,2,'.',',')}}</td>
+            </tr>
          
          
          

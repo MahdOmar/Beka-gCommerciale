@@ -26,8 +26,9 @@
  
 
   <div >
+    @if (Auth::user()->role == "commercial" || Auth::user()->role == "admin")
     <a  class="btn btn-dark btn-sm  p-2 text-white" role="button" data-bs-toggle="modal" data-bs-target="#myModal" ><i class="fas fa-plus-square m-1"></i>Add Client</a>
-
+     @endif
   </div>
       
 </div>  
@@ -65,13 +66,15 @@
                 <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModalCenter{{$client->id}}" title="view" data-placement="bottom" class="float-left btn text-white  btn-warning"><i class="fas fa-eye " ></i></a>
 
                 
+                @if (Auth::user()->role == "commercial" || Auth::user()->role == "admin")
                 <a href="" class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#myModal2"  role="button" onclick="getClient({{$client->id}})"><i class="fas fa-edit"></i></a>
+                @endif
                 <a href="/dashboard/Clients/{{ $client->id}}/Client_details" class="btn btn-info text-white" ><i class="fa-solid fa-circle-info"></i></a>
 
                 
-
+                @if (Auth::user()->role == "commercial" || Auth::user()->role == "admin")
                      <button onclick="deleteClient({{ $client->id }})" id="btn{{ $client->id }}" class='btn btn-danger' ><i class="fas fa-trash"></i></button>
-           
+                @endif
                    
               </td>
               
@@ -192,7 +195,7 @@
       <th>Left</th>
       <th>Tax</th>
       <th>Credit</th>
-      <th>Retour</th>
+    
       <th>Rembourssement</th>
     </tr>
   </thead>
@@ -208,6 +211,8 @@
         $TCredit = 0;
         $TRetour = 0;
         $TRembo = 0;
+
+        $Note = "";
 
 
         
@@ -274,23 +279,37 @@
       
         @if($bl->ClientId == $client->id)
         @php
+        
             $total += $bl->total;
+            if($bl->Factured == 'Oui')
+            {
+              $Note .= "Bl N° ".$bl->Bl_num." de ".$client->Name." ";
+            }
         @endphp
         
         @endif
       
       @endforeach
 
-      @foreach($Bls_F as $bl)
+      @foreach($Facs as $fac)
       
-        @if($bl->ClientId == $client->id)
-        @php
-            $total += $bl->total + $bl->total * 0.19 ;
-        @endphp
-        
-        @endif
+      @if($fac->ClientId == $client->id)
+      @php
+            if($fac->tva == "19")
+            {
+              $total += $fac->total * 1.19;
+
+            }
+            else {
+              $total += $fac->total * 1.09;
+            }
+      @endphp
       
-      @endforeach
+      @endif
+    
+    @endforeach
+
+    
 
       <td>{{ number_format($total,2,'.',',') }}</td>
 
@@ -373,13 +392,13 @@
               
             }
           }
-          foreach($return as $rtn)
-              {
-                if($rtn->ClientId == $client->id ){
-                  $total_left -= $rtn->rn;
+          // foreach($return as $rtn)
+          //     {
+          //       if($rtn->ClientId == $client->id ){
+          //         $total_left -= $rtn->rn;
 
-                }
-              }
+          //       }
+          //     }
 
           if($total_left < 0)
           {
@@ -412,7 +431,7 @@
        <td>{{ number_format($total_tax,2,'.',',') }}</td>
        <td>{{ number_format($total_credit - $total_romb ,2,'.',',') }}</td>
 
-       @php
+       {{-- @php
            $test_rtn = false;
        @endphp
 
@@ -434,7 +453,7 @@
 
        @if (!$test_rtn)
        <td>{{ number_format(0,2,'.',',') }}</td>
-       @endif
+       @endif --}}
 
        @php
        $test_rembo = false;
@@ -491,7 +510,6 @@
       <th>{{ number_format($TLeft,2,'.',',') }}</th>
       <th>{{ number_format($TTax,2,'.',',') }}</th>
       <th>{{ number_format($TCredit,2,'.',',') }}</th>
-      <th>{{ number_format($TRetour,2,'.',',') }}</th>
       <th>{{ number_format($TRembo,2,'.',',') }}</th>
 
 
@@ -500,6 +518,15 @@
 
 
  </table>
+  @if ($Note != '')
+
+  <div class="nb" style="display: none" >
+    <h5><b class="text-danger">NB: Içi vous trouvez les Bls qui seraient Facturés mais aucune Facture est établi encore, c'est à dire ses Totals sont en HT: </b> </h5>
+   <p><b>{{ $Note }}</b></p>
+  </div>
+      
+  @endif
+ 
 </div> 
 
  
@@ -1092,6 +1119,7 @@ $(function(){
 
         $(".etat").toggle();
         $(".sear").toggle();
+        $(".nb").toggle();
         window.scrollTo(0, document.body.scrollHeight);
                 return false
         

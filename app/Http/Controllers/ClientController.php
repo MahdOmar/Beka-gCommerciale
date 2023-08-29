@@ -27,7 +27,6 @@ class ClientController extends Controller
 
           $caisses = Caisse::where('Operation','!=','Reglement de depenses')->get(); 
           $rembo = Caisse::select( 'ClientId',DB::raw('SUM(Amount)  as total'))->where('Operation','Reglement de depenses')->groupBy('ClientId')->get(); 
-          $return = Retour::select( 'ClientId',DB::raw('SUM(Amount)  as rn'))->groupBy('ClientId')->get(); 
        
        
           $banks = DB::table('banks')->select('Total_Amount','Mode','ClientId')->groupBy('Mode')->get();
@@ -48,42 +47,41 @@ class ClientController extends Controller
               ->get();
 
 
-          $Bls_fac = Bl::select(
-            'bls.ClientId',
-             
-            
-         
-            DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+          // $Bls_fac = Bl::select(
+          //   'bls.ClientId',
+          //   DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
           
-            ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-            ->where('bls.Status','!=','Not Factured')
-            ->groupBy('bls.ClientId')
-            ->get();
+           
+          //   ->where('bls.Status','!=','Not Factured')
+          //   ->groupBy('bls.ClientId')
+          //   ->get();
 
             $Bls = Bl::select(
               'bls.ClientId',
+              'bls.Factured',
+              'bls.Bl_num',
                
-              
-           
-              DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
-            
-              ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-              ->where('bls.Status','Not Factured')
+              DB::raw('SUM(bls.total)  as total'))
+              ->where('status','Not Factured')
               ->groupBy('bls.ClientId')
               ->get();
 
+              $Facs = Facture::select(
+                'factures.ClientId',
+                'factures.tva',
+                 
+                DB::raw('SUM(factures.total_HT)  as total'))
+        
+                ->groupBy('factures.ClientId')
+                ->get();
 
-
-
-          
- 
-          
 
 
        
           return view('Clients.index',[ 'clients' => $clients,"caisses" =>$caisses,"allBl" =>$allBl,
-                                       'Bls' => $Bls ,'Bls_F'=>$Bls_fac,'banks' => $banks, 'rembo' => $rembo,'allFactures' =>$allFactures ,
-                                       'return' => $return]);
+                                       'Bls' => $Bls ,'banks' => $banks, 'Facs'=>$Facs,
+                                       'rembo' => $rembo,'allFactures' =>$allFactures 
+                                       ]);
           
          
             }

@@ -17,7 +17,7 @@
         <a href="/dashboard/BL/view/{{  request()->route('id') }}" class="btn btn-success  m-2 p-2 text-white" role="button" ><i class="fas fa-print m-1 "></i>Print</a>
 
       </div>
-      @if ($Bl->User_id == $user)
+      @if ($Bl->User_id == $user || Auth::user()->role == "admin")
       
         <div>
           <a  class="btn btn-dark btn-sm m-2 p-2 text-white " data-bs-toggle="modal" data-bs-target="#myModal" role="button" ><i class="fas fa-plus-square m-1"></i>Add Item</a>
@@ -59,7 +59,7 @@
                 <td>{{$bl->Colis}}</td>
                 <td>{{ number_format($bl->Price_HT,2,'.',',')}} DA</td>
                 <td>{{ number_format($bl->Price_HT * $bl->Quantity ,2,'.',',')}} DA</td>
-                @if ($Bl->User_id == $user)
+                @if ($Bl->User_id == $user || Auth::user()->role == "admin")
 
                 <td>
     

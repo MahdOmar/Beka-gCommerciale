@@ -4,7 +4,7 @@
 
 <div class="m-3">
 
-  <h4><a class="text-info" href="/dashboard/stats">Dashborad</a> / Retour </h4>
+  <h4><a class="text-info" href="/dashboard/stats">Dashborad</a> / Bl / Retour </h4>
 
 
 </div>
@@ -13,7 +13,9 @@
 
 <div  class="shadow  p-3 mb-5 bg-white rounded"  style=" margin-left:10px;margin-right:10px">
 
-  
+  <div>
+    <h4>Bl N°{{ $bl->Bl_num }} de {{ $bl->client->Name }}</h4>
+  </div>
   
   <div class="row">
   <div class="col-md-4">
@@ -26,41 +28,14 @@
 
           <p class="text-success success fw-bold text-center"></p>
            <p class="text-danger error fw-bold text-center"></p>
-           
 
-           
+           <input type="number" name="" id="id" value="{{ request()->route('id') }}" style="display: none">
 
-            <div class="form-group m-2 clients" >
-              <label for="client" class="mb-2">Client:</label>
-              <select name="client" id="ClientName" class="form-control form-select">
-                <option value="" disabled selected>Selectionner Client</option>
-             @foreach ($clients as $client)
-              <option value="{{ $client->id }}">{{ $client->Name }}</option>
-                  
-              @endforeach
+           <div class="form-group m-2 M" >
+            <label for="Des" class=" mb-2">Designation:</label>
+            <input type="text"  id="Des" class="form-control"   name="Des" required>
            
-           </select>    
-              
-             
-             
-             </div>
-
-            
-               <div class="form-group m-2 ">
-                <label for="">Bl:</label>
-               <select name="nameE" id="Bl" class="form-control form-select">
-                <option value="" disabled selected> Selectionner Bl</option>
-            
-           
-
-
-                  
-             
-             
-           </select> 
-           
-        </div>
-      
+          </div>
 
            
 
@@ -88,8 +63,7 @@
     <table class="table table-striped table-hover text-center mt-2">
       <thead class="bg-dark text-white">
         <tr>
-          <th>Client</th>
-          <th>Bl</th>
+          <th>Designation</th>
           <th>Montant</th>
           <th>Date</th>
           <th>Options</th>
@@ -98,13 +72,10 @@
       <tbody>
 
         @foreach ( $retours as $retour)
-        @php
-              $expNum = explode('/', $retour->bl->Bl_num);
-        @endphp
+       
             <tr>
               <td>{{$retour->client->Name }}</td>
 
-              <td>Bl N°{{ $expNum[0] }}/{{  str_pad($expNum[1], 3, '0', STR_PAD_LEFT) }}</td>
             
               <td>{{  number_format($retour->Amount,2,'.',',') }}</td>
               <td>{{ $retour->created_at->format('d-m-Y') }} </td>
@@ -223,7 +194,7 @@ $(function(){
        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
      }
    });
-         if($("#ClientName").val() == "" || $('#Bl').val() ==  "" ||  $('#amountt').val() == "" )
+         if($("#Des").val() == ""  ||  $('#amountt').val() == "" )
          {
             $('.error').text("All fields are required");
               setTimeout(function() { $('.error').text('');
@@ -241,9 +212,8 @@ $(function(){
           var data = {
            
            
-           
-            'Client': $('#ClientName').val(),
-            'Bl': $('#Bl').val(),
+            'id':$('#id').val(),
+            'Des': $('#Des').val(),
             'Amount': $('#amountt').val(),
            
           
@@ -318,8 +288,7 @@ $('tbody').html('')
 
         $('tbody').append('\
         <tr>\
-      <td>'+item.client.Name+'</td>\
-      <td>'+item.bl.Bl_num+'</td>\
+      <td>'+item.Designation+'</td>\
       <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
       <td>'+dateString+'</td>\
       <td>                <button onclick="deleteOperation('+item.id+')" id="btn'+item.id+'" class="btn btn-danger" ><i class="fas fa-trash"></i></button>\
@@ -331,8 +300,7 @@ $('tbody').html('')
           else{
             $('tbody').append('\
             <tr>\
-      <td>'+item.client.Name+'</td>\
-      <td>'+item.bl.Bl_num+'</td>\
+      <td>'+item.Designation+'</td>\
       <td>'+item.Amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
       <td>'+dateString+'</td>\
       <td>             \

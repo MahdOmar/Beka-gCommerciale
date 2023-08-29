@@ -16,6 +16,7 @@ use App\Models\Fdetails;
 use App\Models\Fdbld;
 use App\Models\Retour;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\Return_;
 
 class BlDetailsController extends Controller
 {
@@ -50,6 +51,8 @@ class BlDetailsController extends Controller
         $Bl->Colis = request('Colis');
         $Bl->Price_HT = request('price');
         $Bl->Bl_id = request('id');
+        $bl_client->total += request('Quantity') * request('price');
+        $bl_client->save();
        
         $Bl->save();
 
@@ -60,9 +63,24 @@ class BlDetailsController extends Controller
 
          
           $fd = new Fdetails();
+          $Fact = Facture::find($fd->Fac_id);
           $fd->Designation = $Bl->Designation;
+          
           $fd->Quantity = $Bl->Quantity ;
-          $fd->Price_HT = $Bl->Price_HT / 1.19 ;
+          $fd->Price_HT = $Bl->Price_HT;
+
+          // if($Fact->tva == "19")
+          // {
+          //   $fd->Price_HT = $Bl->Price_HT / 1.19 ;
+          // }
+          // else
+          // {
+          //   $fd->Price_HT = $Bl->Price_HT / 1.09 ;
+          // }
+          $Fact->total_HT += $Bl->Quantity  * $fd->Price_HT;
+          $Fact->save();
+         
+         
           $fd->Fac_id = $F_id[0]->Facture_id;
 
           
@@ -95,6 +113,10 @@ class BlDetailsController extends Controller
 
 
         $Bl->Designation = request('Des');
+
+        $bl_client->total -= ($Bl->Quantity * $Bl->Price_HT);
+        $quantity = $Bl->Quantity;
+        $price = $Bl->Price_HT;
       
 
         $Bl->Quantity = request('Quantity');
@@ -102,7 +124,8 @@ class BlDetailsController extends Controller
         $Bl->Colis = request('Colis');
 
         $Bl->Price_HT = request('price');
-       
+        $bl_client->total += ($Bl->Quantity * $Bl->Price_HT);
+        $bl_client->save();
         $Bl->save();
 
         $new =  $Bl->Price_HT * $Bl->Quantity;
@@ -114,15 +137,32 @@ class BlDetailsController extends Controller
 
         $Fd = Fdetails::find($Fdbl[0]->Fdetails);
 
+        $Facture = Facture::find($Fd->Fac_id);
+        $Facture->total_HT -= ($quantity * $price);
+
        
        
 
         $Fd->Designation = request('Des');
       
         $Fd->Quantity = request('Quantity');
-      
 
-        $Fd->Price_HT = request('price') / 1.19;
+        $Fd->Price_HT = $Bl->Price_HT;
+      // if($Facture->tva == "19")
+      // {
+      //   $Fd->Price_HT = request('price') / 1.19;
+      // }
+      // else
+      // {
+      //   $Fd->Price_HT = request('price') / 1.09;
+
+      // }
+
+      $Facture->total_HT += $Fd->Price_HT * $Fd->Quantity;
+      $Facture->save();
+
+
+
        
         $Fd->save();
 
@@ -143,7 +183,7 @@ class BlDetailsController extends Controller
       public function showView($id)
   {
 
-    $Bl = Bl::with('client')->findOrfail($id);
+    $Bl = Bl::with('client')->where('id',$id)->first();
    
     $Bldetails = Bldetails::where('Bl_id',$id)->get();
 
@@ -287,11 +327,11 @@ $total_tax = 0;
 
 
 
+    $retour = Retour::where('Bl_id',$id)->first();
 
 
 
-
-    return view('BL.show',compact(['Bl','Bldetails','sold']));
+    return view('BL.show',compact(['Bl','Bldetails','sold','retour']));
     
   }
  

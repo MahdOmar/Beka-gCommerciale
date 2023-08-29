@@ -69,7 +69,6 @@
               <option value="Versement à la banque"> Versement à la banque</option>
               <option value="Virement bancaire"> Virement bancaire</option>
               <option value="Chèque bancaire">Chèque bancaire</option>
-              <option value="Espèces"> Espèces</option>
 
 
                   
@@ -134,14 +133,15 @@
   
 </div>
 
-
-
+  </div>
 </div>
+
+
     
  
   
 
-</div>
+
 
 <div id="edit" class="modal fade" role="dialog">
   <div class="modal-dialog modal-md">
@@ -263,7 +263,7 @@
 
             @endif
             <td>{{ $bank->created_at->format('d-m-Y') }} </td>
-            @if ($bank->UserId == $user)
+            @if ($bank->UserId == $user || Auth::user()->role == "admin")
             <td>
               <a href="/dashboard/Bank/{{ $bank->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
 
@@ -302,7 +302,7 @@
 
 
 
-</div>
+
 
 
 
@@ -642,7 +642,7 @@ $('tbody').html('')
         
               total = total + item.Amount;
 
-              if(result.user == item.UserId)
+              if(result.user == item.UserId || result.role == "admin")
                 {
 
             $('tbody').append('\

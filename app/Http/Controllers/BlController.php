@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 
+use App\Exports\BlsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BlController extends Controller
 {
@@ -22,13 +24,22 @@ class BlController extends Controller
         $this->middleware('auth');
       }
 
+      public function export($id) 
+      {
+          return Excel::download(new BlsExport($id), 'Bls.xlsx');
+      }
+
+
+
+
       public function index(){
 
-        $Bls = Bl::with('user')->with('client')->orderBy('created_at','DESC')->paginate(10);
+        $Bls = Bl::with('user')->with('client')->orderBy('created_at','DESC')->get();
         $Bds = Bldetails::all();
         $Payments = Caisse::all();
  
-        $Clients = Client::all();
+        $Clients = Client::orderBy('Name','ASC')->get();
+        
         
 
         
@@ -36,9 +47,10 @@ class BlController extends Controller
        
 
         $user = Auth::id();
+        $role = Auth::user()->role;
       
           return view('BL.index',["bls" => $Bls, 'user' => $user ,'clients' => $Clients,
-                                  "Bds" => $Bds , "Payments" => $Payments] );
+                                  "Bds" => $Bds , "Payments" => $Payments, 'role' => $role] );
           
          
             }
@@ -84,13 +96,15 @@ class BlController extends Controller
               $user =  Auth::id();
               $Bds = Bldetails::all();
               $Payments = Caisse::all();
+              $role = Auth::user()->role;
       
   
               return response()->json([
                 "user"=>$user,
                 "bls" => $Bls,
                 "Bds" =>$Bds,
-                "Payments" => $Payments
+                "Payments" => $Payments,
+                "role" => $role
               
               ]);
          

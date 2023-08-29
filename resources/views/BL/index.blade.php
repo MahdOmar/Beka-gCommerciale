@@ -30,8 +30,9 @@
  
 
   <div >
+    @if($role == "commercial" || $role == "admin")
     <a  class="btn btn-dark btn-sm  p-2 text-white" role="button" data-bs-toggle="modal" data-bs-target="#myModal" ><i class="fas fa-plus-square m-1"></i>Add Bl</a>
-
+     @endif
   </div>
       
 </div>  
@@ -69,13 +70,12 @@
 
             <td>{{ $bl->created_at->format('d-m-Y') }} </td>
             <td>{{ $bl->user->name }} </td>
-            @if ($bl->user->id == $user)
+            @if ($bl->user->id == $user || Auth::user()->role == "admin")
 
             <td>
               <a href="/dashboard/BL/{{ $bl->id }}/details" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
               
-            <!--  <button class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#trans" onclick="setId({{$bl->id}})"  ><i class="fa-solid fa-rotate"></i></button>
-            -->    
+
                    <button onclick="deleteBl({{ $bl->id }})" id="btn{{ $bl->id }}" class='btn btn-danger' ><i class="fas fa-trash"></i></button>
          
                  
@@ -103,11 +103,7 @@
         </tbody>
        </table>
 
-       <div class="pagination d-flex justify-content-center mt-4 ">
-      
-        {{ $bls->links('pagination::bootstrap-4') }}
-
-      </div>
+       
       
        
    
@@ -709,7 +705,7 @@ function fetch (result){
 
                 var dateString = moment(item.created_at).format('DD-MM-YYYY');
               
-                if(result.user == item.User_id)
+                if(result.user == item.User_id || result.role == 'admin')
                 {
 
                 

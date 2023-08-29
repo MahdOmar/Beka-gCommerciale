@@ -14,102 +14,117 @@ use App\Models\Caisse;
 
 class FDetailsController extends Controller
 {
-    public function __construct(){
-        $this->middleware('auth');
-      }
+  public function __construct()
+  {
+    $this->middleware('auth');
+  }
 
-      public function Fac_details($id){
-       
+  public function Fac_details($id)
+  {
 
-            
 
-     
-        $fdetails = Fdetails::where('Fac_id',$id)->get();
-          $Fac = Facture::find($id);
-          $user = Auth::id();
 
-         
-        return view('Facture.details',['fdetails' => $fdetails , 'Fac' => $Fac , 'user' => $user]);
-    }
 
-    public function store(){ 
 
-       
-        $fd =new Fdetails() ;
+    $fdetails = Fdetails::where('Fac_id', $id)->get();
+    $Fac = Facture::find($id);
+    $user = Auth::id();
 
-        $fac = Facture::find(request('id'));
-       
 
-        $fd->Designation = request('Des');
-        $fd->Quantity = request('Quantity');
-        $fd->Price_HT = request('price');
-        $fd->Fac_id = request('id');
-       
-       
-        $fd->save();
+    return view('Facture.details', ['fdetails' => $fdetails, 'Fac' => $Fac, 'user' => $user]);
+  }
 
-      
-       
+  public function store()
+  {
 
-        $fdetails = Fdetails::where('Fac_id',request('id'))->get();
-       
 
-        return $fdetails;
-   
-      } 
+    $fd = new Fdetails();
 
-      public function getDetails()
+    $fac = Facture::find(request('id'));
+
+
+    $fd->Designation = request('Des');
+    $fd->Quantity = request('Quantity');
+    $fd->Price_HT = request('price');
+    $fd->Fac_id = request('id');
+
+    $fac->total_HT += request('Quantity') * request('price');
+    $fac->save();
+
+    $fd->save();
+
+
+
+
+    $bldetails = Fdetails::where('Fac_id', request('id'))->get();
+
+
+    return response()->json([
+      'bldetails' => $bldetails,
+      'facture' => $fac
+    ]);
+  }
+
+  public function getDetails()
   {
     $fdetails = Fdetails::find(request('id'));
     return $fdetails;
   }
 
 
-  public function update(){ 
+  public function update()
+  {
 
-      
 
-       
-    $fd =Fdetails::find(request('id'));
 
- 
+    $fd = Fdetails::find(request('id'));
+
+    $Facture = Facture::find($fd->Fac_id);
+
+    if ($Facture->Type == "Normal") {
+
+      $fd->Designation = request('Des');
+      $fd->save();
+
+      $bldetails = Fdetails::where('Fac_id', request('idB'))->get();
+
+
+      return response()->json([
+        'bldetails' => $bldetails,
+        'facture' => $Facture
+      ]);
+    }
+
 
     $fd->Designation = request('Des');
-  
-
 
     $fd->Quantity = request('Quantity');
 
     $fd->Price_HT = request('price');
-   
- 
-    
+
+
+
     $fd->save();
 
-    
 
-     
-        
-   
 
-   
+    $bldetails = Fdetails::where('Fac_id', request('idB'))->get();
 
-    $bldetails = Fdetails::where('Fac_id',request('idB'))->get();
-   
 
-    return $bldetails;
+    return response()->json([
+      'bldetails' => $bldetails,
+      'facture' => $Facture
+    ]);
+  }
 
-  } 
-  
   public function showView($id)
   {
 
     $Fac = Facture::with('client')->findOrfail($id);
-   
-    $Fdetails = Fdetails::where('Fac_id',$id)->get();
 
-    return view('Facture.show',compact('Fac'),compact('Fdetails'));
-    
+    $Fdetails = Fdetails::where('Fac_id', $id)->get();
+
+    return view('Facture.show', compact('Fac'), compact('Fdetails'));
   }
 
 
@@ -117,18 +132,17 @@ class FDetailsController extends Controller
 
 
 
-      public function destroy(){
-        $Fac = Fdetails::findOrfail(request('id'));
-        $id = $Fac->Fac_id;
-       
-    
-        $Fac->delete();
-        
-        $Facs = Fdetails::where('Fac_id', $id )->get();
-    
-    
-         return $Facs;
-    }
+  public function destroy()
+  {
+    $Fac = Fdetails::findOrfail(request('id'));
+    $id = $Fac->Fac_id;
 
 
+    $Fac->delete();
+
+    $Facs = Fdetails::where('Fac_id', $id)->get();
+
+
+    return $Facs;
+  }
 }

@@ -23,7 +23,7 @@ class BankController extends Controller
 
       public function index(){
 
-        $clients = Client::all();
+        $clients = Client::orderBy('Name','ASC')->get();
         $banks = Bank::with('client')->orderBy('created_at','DESC')->get();
         $payments = Bank::select('Mode','Total_Amount')->where('Date_Enc','<=',date("Y-m-d"))->groupBy('Mode')->get();
         $total = 0 ;
@@ -65,7 +65,17 @@ class BankController extends Controller
                
             }
 
-        $total = $total + $total * 0.19;
+            if($item->tva == "19")
+            {
+              $total = $total * 1.19;
+
+            }
+            else
+            {
+              $total = $total * 1.09;
+
+            }
+
 
          
         $opt = new option();
@@ -132,7 +142,16 @@ class BankController extends Controller
             $total = $total + ($fd->Quantity * $fd->Price_HT);
 
           }
-          $total = $total + $total * 0.19;
+          if($facture->tva == "19")
+          {
+            $total = $total * 1.19;
+
+          }
+          else
+          {
+            $total = $total * 1.09;
+
+          }
            /* *    END  Calculate Total Faxture     */
          
            /** Check If there is payments before */
@@ -142,7 +161,9 @@ class BankController extends Controller
            $new_pay = new Bank();
            $new_pay->ClientId = request('Client');
            $new_pay->Fact_num = $facture->Fac_num;
-           $user = Auth::id();
+           $user = Auth::id(); 
+           $role = Auth::user()->role;
+
           
            $new_pay->Mode = request('Mode')." ".request('Num');
            $new_pay->Date_enc = request('Date');
@@ -177,7 +198,8 @@ class BankController extends Controller
                 return response()->json([
                   "user" => $user,
                   "banks" => $banks,
-                  "total" => $total
+                  "total" => $total,
+                  "role" => $role
             
                 ]);
                 
@@ -225,7 +247,8 @@ class BankController extends Controller
                 return response()->json([
                   "user" => $user,
                   "banks" => $banks,
-                  "total" =>$total
+                  "total" =>$total,
+                  "role" => $role
             
                 ]);
 
@@ -258,7 +281,8 @@ class BankController extends Controller
         return response()->json([
           "user" => $user,
           "banks" => $banks,
-          "total" => $total
+          "total" => $total,
+          "role" => $role
     
         ]);
        
@@ -276,11 +300,13 @@ class BankController extends Controller
         $bank->delete();
         $payments_b = Bank::select('Mode','Total_Amount')->where('Date_Enc','<=',date("Y-m-d"))->groupBy('Mode')->get();
         $user =  Auth::id();
-      
+        $role = Auth::user()->role;
+
   
          return response()->json([
           "user"=>$user,
-          "banks" => $payments_b
+          "banks" => $payments_b,
+          "role" => $role
         ]);
     }
 

@@ -29,14 +29,15 @@ class FactureController extends Controller
   public function index()
   {
 
-    $Clients = Client::all();
+    $Clients = Client::orderBy('Name', 'ASC')->get();
 
     $Facs = Facture::with('user')->with('client')->orderBy('created_at', 'DESC')->paginate(10);
 
     $user = Auth::id();
+    $role = Auth::user()->role;
 
 
-    return view('Facture.index', ['clients' => $Clients, 'facs' => $Facs, 'user' => $user]);
+    return view('Facture.index', ['clients' => $Clients, 'facs' => $Facs, 'user' => $user, 'role' => $role]);
   }
 
 
@@ -48,6 +49,9 @@ class FactureController extends Controller
 
 
     $Fac = new Facture();
+
+
+
 
     if (request('Type') == "Normal") {
 
@@ -85,6 +89,7 @@ class FactureController extends Controller
 
     $Fac->ClientId = request('ClientName');
     $Fac->Type = request('Type');
+    $Fac->tva = request('tva');
 
     if (request('Type') == "Proforma") {
       $Fac->ModePay = "-";
@@ -101,10 +106,12 @@ class FactureController extends Controller
         $Facs = Facture::with('user')->with('client')->orderBy('created_at', 'DESC')->get();
 
         $user =  Auth::id();
+        $role = Auth::user()->role;
 
         return response()->json([
           "user" => $user,
-          "facs" => $Facs
+          "facs" => $Facs,
+          "role" => $role
 
         ]);
       }
@@ -118,6 +125,7 @@ class FactureController extends Controller
 
     $Fac->UserId = Auth::id();
 
+
     $Fac->save();
 
 
@@ -125,12 +133,8 @@ class FactureController extends Controller
     $bls = request('Bls');
 
 
-
-
-
     foreach ($bls as $bl) {
       $Bl = Bl::find($bl);
-
       // insert into fbls table 
       $Fbl = new Fbl();
       $Fbl->Facture_id = $Fac->id;
@@ -140,10 +144,15 @@ class FactureController extends Controller
 
 
 
+
+
+
+
       $Bl->status = 'Facture N°' . $Fac->Fac_num;
       $Bl->save();
 
       $Bds = Bldetails::where('Bl_id', $bl)->get();
+
 
       foreach ($Bds as $Bd) {
 
@@ -151,17 +160,31 @@ class FactureController extends Controller
         $fd = new Fdetails();
         $fd->Designation = $Bd->Designation;
         $fd->Quantity = $Bd->Quantity;
-        if($Bl->Factured == "Oui")
-        {
-          $fd->Price_HT = $Bd->Price_HT ;
+        $fd->Price_HT = $Bd->Price_HT;
+       
+     
+          // if (request('tva') == "19") {
+          //   $fd->Price_HT = $Bd->Price_HT / 1.19;
+          // } else {
+          //   $fd->Price_HT = $Bd->Price_HT / 1.09;
+          // }
+        
 
 
-        }
-        else{
-          $fd->Price_HT = $Bd->Price_HT / 1.19;
+        $facture = Facture::find($Fac->id);
 
-        }
+        $facture->total_HT +=   $fd->Price_HT * $fd->Quantity;
+
+        $facture->save();
+
+
+
+
+
+
         $fd->Fac_id = $Fac->id;
+
+
 
         $fd->save();
 
@@ -336,7 +359,7 @@ class FactureController extends Controller
       $items =  Bl::where('ClientId', request('Client'))
         ->get();
     } else {
-      $items =  Bl::where('ClientId', request('Client'))->where('Status', 'Not Factured')
+      $items =  Bl::where('ClientId', request('Client'))->where('Status', 'Not Factured')->where('Factured',"Oui")
         ->get();
     }
 

@@ -19,7 +19,7 @@
       </div>
       
        
-      @if ($Fac->Type == "Proforma N" &&  $Fac->UserId == $user)
+      @if ($Fac->Type == "Proforma N" && ( $Fac->UserId == $user || Auth::user()->role == "admin"))
       <div>
         <a  class="btn btn-dark btn-sm m-2 p-2 text-white " data-bs-toggle="modal" data-bs-target="#myModal" role="button" ><i class="fas fa-plus-square m-1"></i>Add Item</a>
 
@@ -58,12 +58,15 @@
                 <td>{{$fac->Quantity}} </td>
                 <td>{{ number_format($fac->Price_HT,2,'.',',')}} </td>
                 <td>{{ number_format($fac->Price_HT * $fac->Quantity ,2,'.',',')}} </td>
-                @if ($Fac->Type == "Proforma N" &&  $Fac->User_id == $user)
+                @if (  ($Fac->UserId == $user || Auth::user()->role == "admin"))
 
               
         
                 <td><a  data-bs-toggle="modal" data-bs-target="#myModal2" class="btn btn-primary text-white" role="button" onclick="getDetails({{ $fac->id }})"><i class="fas fa-edit"></i></a>
+                  @if ($Fac->Type =="Proforma N")
                   <button onclick="deleteDetails({{ $fac->id }})" id="btn{{ $fac->id }}" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+
+                  @endif
          </td>
                     
              
@@ -88,15 +91,28 @@
 
               
             <tr>
-                <td colspan="3" class="text-end">Taux TVA 19%</td>
-                <td>{{ number_format($total*0.19  ,2,'.',',')  }} </td>
+              @if ($Fac->tva == "19")
+              <td colspan="3" class="text-end">Taux TVA 19% </td>
+              <td>{{ number_format($total*0.19  ,2,'.',',')  }} </td>
+                @else
+                <td colspan="3" class="text-end">Taux TVA </td>
+                <td>{{ number_format($total*0.09  ,2,'.',',')  }} </td>
 
+                @endif
+               
 
               </tr>
 
               <tr>
                 <td colspan="3" class="text-end">Total TTC</td>
-                <td>{{ number_format($total*0.19 + $total  ,2,'.',',')  }} </td>
+                @if ($Fac->tva == "19")
+                <td>{{ number_format($total*1.19   ,2,'.',',')  }} </td>
+
+                @else
+                <td>{{ number_format($total*1.09  ,2,'.',',')  }} </td>
+
+                    
+                @endif
 
 
               </tr>
@@ -119,7 +135,7 @@
             <div class="modal-header">
                 <h4 class="modal-title">Add item</h4>
                
-              <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               
             </div>
             <div class="modal-body">
@@ -205,9 +221,8 @@
                  
              </div>
 
-
-
-
+             @if ($Fac->Type != "Normal")
+              
                 <div class="form-group m-2 ">
                     <label for="Quantitys" class=" mb-2">Quantity:</label>
                     <input type="number" id="QuantitysE" class="form-control" name="Quantity" step="0.01"  required>
@@ -225,6 +240,8 @@
                 <input type="number"  id="priceE" class="form-control" step="1"  name="price" required>
                
            </div>
+
+           @endif
 
 
               
@@ -598,11 +615,12 @@ function fetch (result){
 
 $('tbody').html('')
 
-            $.each(result, function(key, item){
+            $.each(result.bldetails, function(key, item){
 
                total = total + (item.Quantity * item.Price_HT )
-
-                $('tbody').append('\
+          if(result.facture.Type != 'Normal')
+          {
+            $('tbody').append('\
                  <tr>\
                     <td>'+item.Designation+'</td>\
                     <td>'+item.Quantity+'</td>\
@@ -612,14 +630,31 @@ $('tbody').html('')
                           <button onclick="deleteDetails('+item.id+')" id="btn'+item.id+'" class="btn btn-danger"><i class="fas fa-trash"></i></button>\
                  </td>\
                 </tr>')
+
+          }
+          else {
+            $('tbody').append('\
+                 <tr>\
+                    <td>'+item.Designation+'</td>\
+                    <td>'+item.Quantity+'</td>\
+                    <td> '+(item.Price_HT).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' </td>\
+                    <td>'+((item.Price_HT * item.Quantity)  ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,") +' </td>\
+                    <td><a href="" data-bs-toggle="modal" data-bs-target="#myModal2" class="btn btn-primary text-white" role="button" onclick="getDetails('+item.id+')"><i class="fas fa-edit"></i></a>\
+                 </td>\
+                </tr>')
+
+          }
+               
                 
 
 
              })
-
             
-             
-             $('tbody').append('\
+           
+
+            if(result.facture.tva == "19")
+            {
+              $('tbody').append('\
              <tr>\
                   <td colspan="3" class="text-end">Total</td>\
                   <td>'+total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' </td>\
@@ -632,6 +667,30 @@ $('tbody').html('')
                 <td colspan="3" class="text-end">Total TTC</td>\
                 <td>'+(total + total*0.19).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
               </tr> ');
+
+
+            }
+
+            else
+            {
+              $('tbody').append('\
+             <tr>\
+                  <td colspan="3" class="text-end">Total</td>\
+                  <td>'+total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+' </td>\
+                </tr>\
+                <tr>\
+                <td colspan="3" class="text-end">Taux TVA 09%</td>\
+                <td>'+(total * 0.09).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr>\
+              <tr>\
+                <td colspan="3" class="text-end">Total TTC</td>\
+                <td>'+(total * 1.09).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")+'</td>\
+              </tr> ');
+
+
+            }
+             
+           
 
 
             

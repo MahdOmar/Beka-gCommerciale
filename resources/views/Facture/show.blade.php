@@ -106,7 +106,7 @@
             <div class="border ps-2 pt-2">
                 <p >Mode de paiement: {{ $Fac->ModePay }}</p>
             </div>
-                
+                 
             @endif
            
            
@@ -196,17 +196,42 @@
             <tr >
                 <td  id="word" class="text-start" rowspan="2"  style="border: 1px solid white"></td>
                 <td  style="border-bottom: 1px solid white"></td>
+                @if ($fac->tva == '19')
                 <td  class="text-start">Taux TVA 19%</td>
                 <td class="text-end">{{ number_format($total*0.19  ,2,'.',',')  }} </td>
+                @else
+                <td  class="text-start">Taux TVA 09%</td>
+                <td class="text-end">{{ number_format($total*0.09  ,2,'.',',')  }} </td>
+                @endif
+              
+               
 
 
               </tr>
+              @if ($Fac->ModePay == "Espèces")
+              <tr >
+                <td  style="border-bottom: 1px solid white"></td>
+                <td  class="text-start">Timbre 1%</td>
+                <td class="text-end">{{ number_format($total*0.01  ,2,'.',',')  }} </td>
+
+
+              </tr>
+                  
+              @endif
 
               <tr >
-             
+               
+                @if ($Fac->ModePay == "Espèces")
+                <td   style="border: 1px solid white"></td>
                 <td  style="border-bottom: 1px solid white"></td>
                 <td  class="text-start">Total TTC</td>
-                <td class="text-end">{{ number_format($total*0.19 + $total  ,2,'.',',')  }} </td>
+                <td class="text-end">{{ number_format($total*0.19 + $total * 0.01 + $total  ,2,'.',',')  }} </td>
+                 @else
+                 <td  style="border-bottom: 1px solid white"></td>
+                 <td  class="text-start">Total TTC</td>
+                 <td class="text-end">{{ number_format($total*0.19 + $total  ,2,'.',',')  }} </td>
+
+                @endif
 
 
               </tr>

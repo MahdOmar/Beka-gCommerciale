@@ -20,12 +20,12 @@ class RetourController extends Controller
         $this->middleware('auth');
       }
 
-      public function index(){
-        $clients = Client::all();
-        $retours = Retour::with('user')->with('bl')->with('client')->orderBy('created_at','DESC')->get();
+      public function index($id){
+        $bl = Bl::with('client')->where('id',$id)->first();
+        $retours = Retour::with('user')->with('bl')->with('client')->where('Bl_id',$id)->orderBy('created_at','DESC')->get();
         $user =Auth::id();
 
-          return view('Retour.index',compact(['clients','retours','user']) );
+          return view('Retour.index',compact(['bl','retours','user']) );
           
          
             }
@@ -64,7 +64,7 @@ class RetourController extends Controller
 
             public function store(){ 
 
-              $Bl = Retour::where('Bl_id',request('Bl'))->get();
+              $Bl = Retour::where('Bl_id',request('id'))->get();
 
               if(count($Bl) > 0)
               { return response()->json([
@@ -76,7 +76,7 @@ class RetourController extends Controller
               }
 
              
-              $blds = Bldetails::where('Bl_id',request('Bl'))->get();
+              $blds = Bldetails::where('Bl_id',request('id'))->get();
               $total = 0;
               foreach($blds as $bd)
               {
@@ -93,12 +93,13 @@ class RetourController extends Controller
 
               }
 
-
+             $Bl = Bl::find(request('id'));
 
               $retour =new Retour() ;
 
-             $retour->ClientId = request('Client');
-              $retour->Bl_id = request('Bl');
+             $retour->ClientId = $Bl->ClientId;
+              $retour->Bl_id = $Bl->id;
+              $retour->Designation = request('Des');
   
               $retour->Amount= request('Amount');
 
@@ -107,7 +108,7 @@ class RetourController extends Controller
               $retour->UserId = Auth::id();
               $retour->save();
   
-              $retours = Retour::with('user')->with('bl')->with('client')->orderBy('created_at','DESC')->get();
+              $retours = Retour::with('user')->with('bl')->with('client')->where('Bl_id',$Bl->id)->orderBy('created_at','DESC')->get();
   
               $user =  Auth::id();
               

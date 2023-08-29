@@ -4,37 +4,63 @@
 
 <div class="m-3">
 
-  <h4><a class="text-info" href="/dashboard/stats">Dashborad</a> / Caisse </h4>
+  <h4><a class="text-info" href="/dashboard/stats">Dashborad</a> / Payment </h4>
 
 
 </div>
-
-
-
-<div  class="shadow  p-3 mb-5 bg-white rounded"  style=" margin-left:10px;margin-right:10px">
-
-  
-  
-  <div class="row">
+<div class="row">
   <div class="col-md-6">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mt-2">Ajouter Opération</h5>
-            
-        </div>
-        <div class="card-body">
+    <div class="form-group m-2">
+      <label for="nameE" class="mb-2">Payment:</label>
+      <select name="nameE" id="pay" class="form-control form-select">
+        <option value="" disabled selected>Selectionner Type de Payment</option>
+        <option value="caisse" >Caisse</option>
+        <option value="bank" >Banque</option>
+      
+   </select>    
+      
+     
+     
+  </div> 
+  </div>
 
-          <p class="text-success success text-center"></p>
-           <p class="text-danger error text-center"></p>
-            <div class="form-group m-2">
-                <label for="nameE" class="mb-2">Opération:</label>
-                <select name="nameE" id="Type" class="form-control form-select">
-                  <option value="" disabled selected>Selectionner Type d'Opération</option>
-                  <option value="Encaissement de Bl" >Encaissement Bl</option>
-                  <option value="Encaissement de Facture" >Encaissement de Facture</option>
-                  <option value="Autre Encaissement" >Autre Encaissement</option>
-                  <option value="Reglement de depenses" >Règlement de dépenses</option>
 
+<div  class="shadow caisse  p-3 mb-5 bg-white rounded"  style=" margin-left:10px;margin-right:10px;display: none">
+
+  <div class="row ">
+    <div class="col-md-6">
+      <div class="card">
+          <div class="card-header">
+              <h5 class="mt-2">Ajouter Opération</h5>
+              
+          </div>
+          <div class="card-body">
+  
+            <p class="text-success success text-center"></p>
+             <p class="text-danger error text-center"></p>
+              <div class="form-group m-2">
+                  <label for="nameE" class="mb-2">Opération:</label>
+                  <select name="nameE" id="Type" class="form-control form-select">
+                    <option value="" disabled selected>Selectionner Type d'Opération</option>
+                    <option value="Encaissement de Bl" >Encaissement Bl</option>
+                    <option value="Encaissement de Facture" >Encaissement de Facture</option>
+                    <option value="Autre Encaissement" >Autre Encaissement</option>
+                    <option value="Reglement de depenses" >Règlement de dépenses</option>
+  
+                  
+                 
+               </select>    
+                  
+                 
+                 
+              </div> 
+  
+              <div class="form-group m-2 regl" style="display: none">
+                <label for="nameE" class="mb-2">Type:</label>
+                <select name="nameE" id="Treg" class="form-control form-select">
+                  <option value="" disabled selected>Selectionner Type de Règlement</option>
+                  <option value="Client" >Remboursement Client</option>
+                  <option value="Autre" >Autre</option>
                 
                
              </select>    
@@ -42,130 +68,424 @@
                
                
             </div> 
-
-            <div class="form-group m-2 regl" style="display: none">
-              <label for="nameE" class="mb-2">Type:</label>
-              <select name="nameE" id="Treg" class="form-control form-select">
-                <option value="" disabled selected>Selectionner Type de Règlement</option>
-                <option value="Client" >Remboursement Client</option>
-                <option value="Autre" >Autre</option>
-              
-             
-           </select>    
-              
-             
-             
-          </div> 
-
-
-
-
-
-
-            <div class="form-group m-2 clients" style="display: none">
-              <label for="nameE" class="mb-2">Client:</label>
-              <select name="nameE" id="ClientName" class="form-control form-select">
-                <option value="" disabled selected>Selectionner Client</option>
-              @foreach ($clients as $client)
-              <option value="{{ $client->id }}">{{ $client->Name }}</option>
-                  
-              @endforeach
-             
-           </select>    
-              
-             
-             
-             </div>
-
-            <div class="form-group m-2 F" style="display: none;">
-                <label for="nameE" class="mb-2">Facture:</label>
-                <select name="nameE" id="Facture" placeholder="Native Select" data-search="false" data-silent-initial-value-set="true"  class="form-control  " multiple>
+  
+  
+  
+  
+  
+  
+              <div class="form-group m-2 clients" style="display: none">
+                <label for="nameE" class="mb-2">Client:</label>
+                <select name="nameE" id="ClientName" class="form-control form-select">
+                  <option value="" disabled selected>Selectionner Client</option>
+                @foreach ($clients as $client)
+                <option value="{{ $client->id }}">{{ $client->Name }}</option>
+                    
+                @endforeach
                
-               
-             </select>     
+             </select>    
                 
                
                
-               </div> 
-      
-
-            <div class="form-group m-2 D" style="display: none" >
-                <label for="Des" class=" mb-2">Designation:</label>
-                <input type="text" id="Des" class="form-control" name="Des"   required>
-               
-               
-           </div>
-
-           <div class="form-group m-2 M" >
-            <label for="price" class=" mb-2">Montant:</label>
-            <input type="number"  id="price" class="form-control" step="1"  name="price" required>
+               </div>
+  
+              <div class="form-group m-2 F" style="display: none;">
+                  <label for="nameE" class="mb-2">Facture:</label>
+                  <select name="nameE" id="Facture" placeholder="Native Select" data-search="false" data-silent-initial-value-set="true"  class="form-control  " multiple>
+                 
+                 
+               </select>     
+                  
+                 
+                 
+                 </div> 
+        
+  
+              <div class="form-group m-2 D" style="display: none" >
+                  <label for="Des" class=" mb-2">Designation:</label>
+                  <input type="text" id="Des" class="form-control" name="Des"   required>
+                 
+                 
+             </div>
+  
+             <div class="form-group m-2 M" >
+              <label for="price" class=" mb-2">Montant:</label>
+              <input type="number"  id="price" class="form-control" step="1"  name="price" required>
+             
+            </div>
+  
            
-          </div>
-
+  
          
+         
+          </div>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary submit m-2">Valider</button>
+  
+      </div>
+    
+    </div>
+  
+    <div class="col-md-6">
+  
+      <div class="card">
+          <div class="card-header">
+              <h5 class="mt-2">la Caisse</h5>
+  
+             
+              
+          </div>
+          <div class="card-body">
+  
+            <div class="d-flex justify-content-center m-3">
+            <img src="/img/caisse.png" width="150" height="150" alt="">
+          </div>
+  
+          @php
+          $total = 0 ;
+             foreach($caisse as $cais)
+              {
+                if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl"
+                ||$cais->Operation == "Autre Encaissement" )
+                {
+                  $total = $total + $cais->Amount;
+  
+                }
+  
+                else {
+                  $total = $total - $cais->Amount;
+                }
+  
+              }
+           
+  
+            
+             
+          @endphp
+  
+            <h4 class="text-center" id="total">Total: {{ number_format($total,2,'.',',')  }}  Da</h4>
+          </div>
+      </div>
+    
+  </div>
+  
+  
+  
+  </div>
+<hr>
+  <br><br>
+  <div class="d-flex justify-content-center mb-5">
+    <button class="btn btn-dark  " id='details'>Voir détails</button>
+  
+  </div>
+  
+      
+    </div>
+  
+  
 
-       
-       
+  
+    
+     
+      
+    
+    
+    
+    <div id="edit" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-md">
+    
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+              <h4 class="modal-title">Edit Operation</h4>
+             
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            
+          </div>
+          <div class="modal-body">
+        
+             <p class="text-success successe text-center"></p>
+             <p class="text-danger errore text-center"></p>
+    
+    
+             <input type="hidden" id="id" name="id">
+    
+             <div class="form-group m-2 D" >
+              <label for="DesE" class=" mb-2">Designation:</label>
+              <input type="text" id="DesE" class="form-control" name="Des"   >
+             
+             
+             </div>
+    
+            <div class="form-group m-2 M" >
+             <label for="priceE" class=" mb-2">Montant:</label>
+             <input type="number"  id="priceE" class="form-control" step="1"  name="price" required>
+         
+            </div>
+    
+            
+    
+      
+    
+      
+          </div>
+          <div class="modal-footer">
+              <button
+              type="button"
+              class="btn btn-danger"
+              data-bs-dismiss="modal"
+            >
+              Fermer
+            </button>
+            <div class="form-group">
+            <button  class="btn btn-dark update">Edit </button>
+            </div> 
+          </div>
+        </form>
         </div>
+    
+      </div>
     </div>
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-primary submit m-2">Valider</button>
+    
+  
+    
+    <div  class="shadow p-3 mb-5 bg-white rounded" id="dtable"  style=" margin-left:10px;margin-right:10px;display:none">
+    
+    
+      
+    
+    
+    
+      <div class="row">
+    
+        <div class="col-md-4 ">
+          <input type="text" name="search" class="form-control" id="searchP" placeholder="search" >
+        </div>
+    
+       
+        
+      
+      
+       
+      
+     
+      
+      </div>
+          
+       
+        
+             <table class="table table-striped table-hover text-center mt-2 " >
+              <thead class="bg-dark text-white">
+                <tr>
+                  
+                  <th>Num</th>
+                  <th>Operation</th>
+                  <th>Designation</th>
+                  <th>Montant</th>
+                  <th>Options</th>
+                </tr>
+              </thead>
+              <tbody>
+    
+                @foreach ($caisse as $item)
+                <tr>
+                  <td>{{ $item->id }}</td>
+                  <td>{{ $item->Operation }}</td>
+                @if ( $item->Operation == "Encaissement de Facture" || $item->Operation == "Encaissement de Bl" )
+                <td>{{$item->Designation}}</td>
+                @else
+                <td>{{$item->Designation}}</td>
+                @endif
+                 
+                  <td>{{ number_format($item->Amount ,2,'.',',') }} </td>
+    
+                  @if ( $item->Operation == "Encaissement de Facture" || $item->Operation == "Encaissement de Bl" )
+                  <td> <a href="/dashboard/Caisse/{{$item->id}}/details" class="btn btn-success text-white"   role="button" >Details</a>
+    
+                      
+                  @else
+                  @if ($user == $item->user->id || Auth::user()->role == "admin")
+                  <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation({{$item->id}})"  ><i class="fas fa-edit"></i></button>
+                    @if (str_contains($item->Designation,'Remboursement Client'))
+                    <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>
+      
+                    @endif
+                    <button onclick="deleteOperation({{$item->id}})" id="btn{{$item->id}}" class="btn btn-danger" ><i class="fas fa-trash"></i></button>
+                  
+                      
+                  @else
+                  @if (str_contains($item->Designation,'Remboursement Client'))
+                 <td> <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
+                 </td>
+                  @endif
+                      
+                  @endif
+                  
+                
+                  
+                
+    
+                  
+                      
+                  @endif
+                 
+    
+                  
+    
+              </tr>
+                    
+                @endforeach
+    
+              </tbody>
+            </table>
+           
+    
+    </div>
+    
+  </div>
+  <div  class="shadow bank  p-3 mb-5 bg-white rounded"  style=" margin-left:10px;margin-right:10px;display: none">
 
+    <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+          <div class="card-header">
+              <h5 class="mt-2">Ajouter Opération</h5>
+              
+          </div>
+          <div class="card-body">
+  
+            <p class="text-success success fw-bold text-center"></p>
+             <p class="text-danger error fw-bold text-center"></p>
+             
+  
+             
+  
+  
+  
+  
+  
+  
+              <div class="form-group m-2 clients" >
+                <label for="nameE" class="mb-2">Client:</label>
+                <select name="nameE" id="ClientName" class="form-control form-select">
+                  <option value="" disabled selected>Selectionner Client</option>
+                @foreach ($clients as $client)
+                <option value="{{ $client->id }}">{{ $client->Name }}</option>
+                    
+                @endforeach
+               
+             </select>    
+                
+               
+               
+               </div>
+  
+              <div class="form-group m-2 F" >
+                  <label for="nameE" class="mb-2">Facture:</label>
+                  <select name="nameE" id="Facture" placeholder="Native Select" data-search="false" data-silent-initial-value-set="true"  class="form-control  " multiple>
+                 
+                 
+               </select>    
+                  
+                 
+                 
+                 </div>
+  
+                 <div class="form-group m-2 ">
+                  <label for="">Mode de paiement:</label>
+                 <select name="nameE" id="Mode" class="form-control form-select">
+                  <option value="" disabled selected> Selectionner Mode de paiement</option>
+              
+                <option value="Versement à la banque"> Versement à la banque</option>
+                <option value="Virement bancaire"> Virement bancaire</option>
+                <option value="Chèque bancaire">Chèque bancaire</option>
+  
+  
+                    
+               
+               
+             </select> 
+             
+          </div>
+        
+  
+              <div class="form-group m-2 cheq"  >
+                  <label for="cheque" class=" mb-2">Numéro d'opétation:</label>
+                  <input type="text" id="cheque" class="form-control" name="Des"   required>
+                 
+                 
+             </div>
+  
+             <div class="form-group m-2 Date" >
+              <label for="Date_enc" class=" mb-2">Date:</label>
+              <input type="date" id="Date_enc" class="form-control" name="Des"   required>
+             
+             
+         </div>
+  
+             <div class="form-group m-2 M" >
+              <label for="price" class=" mb-2">Montant:</label>
+              <input type="number"  id="price" class="form-control" step="1"  name="price" required>
+             
+            </div>
+  
+           
+  
+         
+         
+          </div>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary submit m-2">Valider</button>
+  
+      </div>
+    
     </div>
+  
+    <div class="col-md-6">
+  
+      <div class="card">
+          <div class="card-header">
+              <h5 class="mt-2">la Banque</h5>
+  
+             
+              
+          </div>
+          <div class="card-body">
+  
+            <div class="d-flex justify-content-center m-3">
+            <img src="/img/bank.png" width="150" height="150" alt="">
+          </div>
+  
+            <h4 class="text-center" id="total">Total: {{ number_format($total ,2,'.',',') }}   Da</h4>
+          </div>
+      </div>
+    
+  </div>
+  
+    </div>
+    <hr>
+  <br><br>
+    
+  <div class="d-flex justify-content-center mb-5">
+    <button class="btn btn-dark  " id='details'>Voir détails</button>
   
   </div>
 
-  <div class="col-md-6">
+</div>
 
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mt-2">la Caisse</h5>
+    
+ 
 
-           
-            
-        </div>
-        <div class="card-body">
-
-          <div class="d-flex justify-content-center m-3">
-          <img src="/img/caisse.png" width="150" height="150" alt="">
-        </div>
-
-        @php
-        $total = 0 ;
-           foreach($caisse as $cais)
-            {
-              if($cais->Operation == "Encaissement de Facture" || $cais->Operation == "Encaissement de Bl"
-              ||$cais->Operation == "Autre Encaissement" )
-              {
-                $total = $total + $cais->Amount;
-
-              }
-
-              else {
-                $total = $total - $cais->Amount;
-              }
-
-            }
-         
-
-          
-           
-        @endphp
-
-          <h4 class="text-center" id="total">Total: {{ number_format($total,2,'.',',')  }}  Da</h4>
-        </div>
-    </div>
-  
 </div>
 
 
-
-</div>
     
  
   
 
-</div>
+
 
 <div id="edit" class="modal fade" role="dialog">
   <div class="modal-dialog modal-md">
@@ -187,8 +507,8 @@
          <input type="hidden" id="id" name="id">
 
          <div class="form-group m-2 D" >
-          <label for="DesE" class=" mb-2">Designation:</label>
-          <input type="text" id="DesE" class="form-control" name="Des"   >
+          <label for="DesE" class=" mb-2">Numéro de Chèque:</label>
+          <input type="text" id="DesE" class="form-control" name="Des"   required>
          
          
          </div>
@@ -223,108 +543,14 @@
   </div>
 </div>
 
-<div class="d-flex justify-content-center mb-5">
-  <button class="btn btn-dark  " id='details'>Voir détails</button>
-
-</div>
 
 
-<div  class="shadow p-3 mb-5 bg-white rounded" id="dtable"  style=" margin-left:10px;margin-right:10px;display:none">
 
 
   
 
 
 
-  <div class="row">
-
-    <div class="col-md-4 ">
-      <input type="text" name="search" class="form-control" id="searchP" placeholder="search" >
-    </div>
-
-   
-    
-  
-  
-   
-  
- 
-  
-  </div>
-      
-   
-    
-         <table class="table table-striped table-hover text-center mt-2 " >
-          <thead class="bg-dark text-white">
-            <tr>
-              
-              <th>Num</th>
-              <th>Operation</th>
-              <th>Designation</th>
-              <th>Montant</th>
-              <th>Options</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            @foreach ($caisse as $item)
-            <tr>
-              <td>{{ $item->id }}</td>
-              <td>{{ $item->Operation }}</td>
-            @if ( $item->Operation == "Encaissement de Facture" || $item->Operation == "Encaissement de Bl" )
-            <td>{{$item->Designation}}</td>
-            @else
-            <td>{{$item->Designation}}</td>
-            @endif
-             
-              <td>{{ number_format($item->Amount ,2,'.',',') }} </td>
-
-              @if ( $item->Operation == "Encaissement de Facture" || $item->Operation == "Encaissement de Bl" )
-              <td> <a href="/dashboard/Caisse/{{$item->id}}/details" class="btn btn-success text-white"   role="button" >Details</a>
-
-                  
-              @else
-              @if ($user == $item->user->id)
-              <td>  <button  data-bs-toggle="modal" data-bs-target="#edit" class="btn btn-primary text-white" role="button" onclick="getOperation({{$item->id}})"  ><i class="fas fa-edit"></i></button>
-                @if (str_contains($item->Designation,'Remboursement Client'))
-                <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print  "></i></a>
-  
-                @endif
-                <button onclick="deleteOperation({{$item->id}})" id="btn{{$item->id}}" class="btn btn-danger" ><i class="fas fa-trash"></i></button>
-              
-                  
-              @else
-              @if (str_contains($item->Designation,'Remboursement Client'))
-             <td> <a href="/dashboard/Caisse/{{ $item->id }}/print" class="btn btn-success text-white" role="button" ><i class="fas fa-print"></i></a>
-             </td>
-              @endif
-                  
-              @endif
-              
-            
-              
-            
-
-              
-                  
-              @endif
-             
-
-              
-
-          </tr>
-                
-            @endforeach
-
-          </tbody>
-        </table>
-       
-
-</div>
-
-
-
-</div>
 
 
 
@@ -997,10 +1223,42 @@ headers: {
    
 });
 
+
+$(function(){
+       
+       $('#pay').change(function(){
+
+        if($('#pay').val() == 'caisse' ){
+          $(".caisse").show();
+          $(".bank").hide();
+        }
+        else{
+          $(".bank").show();
+          $(".caisse").hide();
+        
+
+        }
+});
+      
+      
+        
+        
+
+         
+      
+          
+       });
+
 });
 
 
+
+
+
    
    
+
+
+
   </script>
   

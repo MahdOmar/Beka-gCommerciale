@@ -142,11 +142,10 @@
 
       <li><a class="{{ (request()->segment(2) == 'BL') ? 'active' : '' }}"  href="/dashboard/BL"><i class="fa-solid fa-file-invoice-dollar"></i>Gestion de BL</a></li>
       <li><a class="{{ (request()->segment(2) == 'Factures') ? 'active' : '' }}" href="/dashboard/Factures"><i class="fa-solid fa-file-lines"></i>Gestion de Facture</a></li>
-
+      @if (Auth::user()->role == "caissier" || Auth::user()->role == "admin")
       <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de la Caisse</a></li>
-      <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li>
-      <li><a class="{{ (request()->segment(2) == 'Retour') ? 'active' : '' }}"  href="/dashboard/Retour"><i class="fa-solid fa-rotate-left"></i>Gestion de Retour</a></li>
-
+      {{-- <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li> --}}
+       @endif
      
 
         
@@ -192,8 +191,9 @@
        
       
         <div >
+          @if($role == "commercial" || $role == "admin")
           <button  class="btn btn-dark btn-sm  p-2 text-white"  data-bs-toggle="modal" data-bs-target="#myModal" ><i class="fas fa-plus-square m-1"></i>Add Facture</button>
-      
+          @endif
         </div>
             
       </div>  
@@ -232,7 +232,7 @@
                     <td>{{ $fac->created_at->format('d-m-Y') }} </td>
                     <td>{{ $fac->user->name }} </td>
                  
-                    @if ($fac->user->id == $user)
+                    @if ($fac->user->id == $user || Auth::user()->role == "admin")
         
                     <td>
                       <a href="/dashboard/Factures/{{ $fac->id }}/details" class="btn btn-success text-white" role="button" ><i class="fas fa-plus-square"></i></a>
@@ -330,6 +330,20 @@
                  
                   <option value="new">Nouveau</option>
                   <option value="Bls">Depuis Bls</option>
+                      
+                  
+                 
+               </select> 
+                    
+                 </div>
+
+
+                 <div class="form-group m-2 " >
+                  <label for="tva" class="mb-2">TVA:</label>
+                  <select name="tva" id="tva" class="form-control form-select">
+                 
+                  <option value="19">19%</option>
+                  <option value="09">09%</option>
                       
                   
                  
@@ -440,6 +454,19 @@
                  
                  
                  </div>
+
+                 <div class="form-group m-2 " >
+                  <label for="tva" class="mb-2">TVA:</label>
+                  <select name="tva" id="tvaE" class="form-control form-select">
+                 
+                  <option value="19">19%</option>
+                  <option value="09">09%</option>
+                      
+                  
+                 
+               </select> 
+                    
+                 </div>
       
                  <div class="form-group m-2 Mod" style="display:none">
                   <label for="nameE" class="mb-2">Mode de Payment:</label>
@@ -542,6 +569,18 @@ crossorigin="anonymous"
   
         }
 
+        else if($('#tva').val() == null)
+        {
+          $('.error').text("Selectionner Type Facture");
+          
+         
+          setTimeout(function() { $('.error').text('');
+          
+  
+              }, 3000);
+  
+        }
+
         else if( ($('#myModal .bls').is(":visible") &&  $('#Bls').val().length == 0))
         {
   
@@ -589,6 +628,7 @@ crossorigin="anonymous"
               'ClientName': $('#ClientName').val(),
               'TypeP' :$('#TypeP').val(),
               'Type': $('#Type').val(),
+              'tva': $('#tva').val(),
               'Mode': $('#Mode').val(),
               'Bls': $('#Bls').val()
             
@@ -907,7 +947,7 @@ crossorigin="anonymous"
   
                   var dateString = moment(item.created_at).format('DD-MM-YYYY');
                 
-                  if(result.user == item.UserId)
+                  if(result.user == item.UserId || result.user == 'admin') 
                   {
   
                   

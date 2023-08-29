@@ -105,15 +105,22 @@
         
         <ul class="text center">
             <li><a class="{{ (request()->segment(2) == 'stats') ? 'active' : '' }}" href="/dashboard/stats"> <i class="fas fa-chart-line"></i>Dashboard</a></li>
+           
             <li><a class="{{ (request()->segment(2) == 'Clients') ? 'active' : '' }}"  href="/dashboard/Clients"><i class="fa-solid fa-users"></i>Gestion de Clients</a></li>
 
-        <li><a class="{{ (request()->segment(2) == 'BL') ? 'active' : '' }}"  href="/dashboard/BL"><i class="fa-solid fa-file-invoice-dollar"></i>Gestion de BLs</a></li>
-        <li><a class="{{ (request()->segment(2) == 'Factures') ? 'active' : '' }}" href="/dashboard/Factures"><i class="fa-solid fa-file-lines"></i>Gestion de Factures</a></li>
+            <li><a class="{{ (request()->segment(2) == 'BL') ? 'active' : '' }}"  href="/dashboard/BL"><i class="fa-solid fa-file-invoice-dollar"></i>Gestion de BLs</a></li>
+            <li><a class="{{ (request()->segment(2) == 'Factures') ? 'active' : '' }}" href="/dashboard/Factures"><i class="fa-solid fa-file-lines"></i>Gestion de Factures</a></li>
+    
+                
+            
 
-        <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de la Caisse</a></li>
-        <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li>
-        <li><a class="{{ (request()->segment(2) == 'Retour') ? 'active' : '' }}"  href="/dashboard/Retour"><i class="fa-solid fa-rotate-left"></i>Gestion de Retour</a></li>
-
+            @if (Auth::user()->role == "caissier" || Auth::user()->role == "admin")
+            <li><a class="{{ (request()->segment(2) == 'Caisse') ? 'active' : '' }}"  href="/dashboard/Caisse"><i class="fa-solid fa-cash-register"></i>Gestion de la Caisse</a></li>
+            {{-- <li><a class="{{ (request()->segment(2) == 'Bank') ? 'active' : '' }}"  href="/dashboard/Bank"><i class="fa-solid fa-building-columns"></i>Gestion de la Banque</a></li> --}}
+    
+            @endif
+          
+       
       
      
 

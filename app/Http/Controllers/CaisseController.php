@@ -35,19 +35,34 @@ class CaisseController extends Controller
 
       public function index(){
 
+        // Caisse Param
+
        $caisse = Caisse::with('user')->orderBy('created_at','DESC')->get();
        $Credits = Clientcredit::all();
-       $user =  Auth::id();
 
- 
-    
+       //Bank Param
+
+       $clients = Client::orderBy('Name','ASC')->get();
+       $banks = Bank::with('client')->orderBy('created_at','DESC')->get();
+       $payments = Bank::select('Mode','Total_Amount')->where('Date_Enc','<=',date("Y-m-d"))->groupBy('Mode')->get();
+       $total = 0 ;
+       foreach ($payments as $key ) {
+          $total += $key->Total_Amount;
+       }
+
+
+       $user =  Auth::id(); 
+
+      
+     
 
        
 
-     $Clients = Client::all();
+       $Clients = Client::orderBy('Name','ASC')->get();
       
           return view('Caisse.index',["caisse"=>$caisse , 'user' => $user,
-                                       "clients" => $Clients, "Credits" => $Credits]);
+                                       "clients" => $Clients, "Credits" => $Credits,
+                                      "banks" => $banks,"total" => $total]);
           
          
             }
@@ -57,6 +72,7 @@ class CaisseController extends Controller
               $Caisses = Caisdetails::with('user')->where('Caisse_id',$id)->get();
               $client = Caisse::find($Caisses[0]->Caisse_id);
               $user = Auth::id();
+              
 
               return view('Caisse.Caissedetails',["Caisses"=>$Caisses , 'user' => $user,
                                                  'client'=>$client]);
@@ -90,27 +106,52 @@ class CaisseController extends Controller
             $rembo = Caisse::select( DB::raw('SUM(Amount)  as total'))->where('Designation',"Remboursement Client ".$client->Name)->get(); 
             $return = Retour::select( 'ClientId',DB::raw('SUM(Amount)  as rn'))->groupBy('ClientId')->get(); 
 
-            $Bls = Bl::select(
-              'bls.ClientId',
+            // $Bls = Bl::select(
+            //   'bls.ClientId',
                
               
            
-              DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+            //   DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
             
-              ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-              ->where('bls.Status','Not Factured')
+            //   ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+            //   ->where('bls.Status','Not Factured')
+            //   ->where('bls.ClientId',request('Client'))
+            //   ->get();
+
+            //   $Bls_fac = Bl::select(
+            //     'bls.ClientId',
+                 
+            //     DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
+              
+            //     ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
+            //     ->where('bls.Status','!=','Not Factured')
+            //     ->where('bls.ClientId',request('Client'))
+            //     ->get();
+
+
+            $Bls = Bl::select(
+              'bls.ClientId',
+               
+              DB::raw('SUM(bls.total)  as total'))
+              ->where('status','Not Factured')
               ->where('bls.ClientId',request('Client'))
               ->get();
 
-              $Bls_fac = Bl::select(
-                'bls.ClientId',
+              $Facs = Facture::select(
+                'factures.ClientId',
+                'factures.tva',
                  
-                DB::raw('SUM((bldetails.Price_Ht * bldetails.Quantity))  as total'))
-              
-                ->leftJoin('bldetails', 'bldetails.Bl_id', '=', 'bls.id')
-                ->where('bls.Status','!=','Not Factured')
-                ->where('bls.ClientId',request('Client'))
+                DB::raw('SUM(factures.total_HT)  as total'))
+        
+                ->where('factures.ClientId',request('Client'))
                 ->get();
+
+
+
+
+
+
+
               
               $total_payed = 0;
               $total_tax = 0;
@@ -142,17 +183,26 @@ class CaisseController extends Controller
         
           $total_left = 0;
           $total_credit = 0;
-        
-          $total_left = $Bls[0]->total + $Bls_fac[0]->total + $Bls_fac[0]->total * 0.19  + $total_tax - $total_payed;
 
-          foreach($return as $rtn)
-              {
-                if($rtn->ClientId == request('Client') ){
-                  $total_left -= $rtn->rn;
 
-                }
-              }
-          
+
+         $total = 0;
+
+          if($Facs[0]->tva == "19")
+            {   
+                        
+              $total= $Bls[0]->total + ($Facs[0]->total * 1.19)  + $total_tax;
+
+
+            }
+            else {
+
+              $total = $Bls[0]->total + ($Facs[0]->total * 1.09)  + $total_tax ;
+
+            }
+
+            $total_left = $total - $total_payed;
+      
 
           if($total_left < 0)
           {
@@ -164,9 +214,10 @@ class CaisseController extends Controller
 
          
 
-           
+         
             if(abs(request('Price') - ($total_credit - $rembo[0]->total) > 1 ))
             {
+            
               return response()->json([
                 "Error"=>"Montant superieur a Credit",
                 
@@ -197,7 +248,7 @@ class CaisseController extends Controller
          $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
 
          $user =  Auth::id();
-
+         $role = Auth::user()->role;
          
          $Credits = Clientcredit::all();
       
@@ -205,7 +256,8 @@ class CaisseController extends Controller
          return response()->json([
            "user"=>$user,
            "caisses" => $caisses,
-           "Credits" => $Credits
+           "Credits" => $Credits,
+           "role" => $role
          
          ]);
         
@@ -223,6 +275,7 @@ class CaisseController extends Controller
         $caisse->UserId = Auth::id();
         $caisse->ClientId = 0;
         $user = Auth::id();
+        $role = Auth::user()->role;
         
         
          $caisse->save();
@@ -231,7 +284,8 @@ class CaisseController extends Controller
                 
          return response()->json([
            "user" => $user,
-           "caisses" => $caisses
+           "caisses" => $caisses,
+           "role" => $role
      
          ]);
 
@@ -249,7 +303,7 @@ class CaisseController extends Controller
         {
 
         /** Count Total */
-        $Bls = Bl::where('ClientId',request('Client'))->where('Status','Not Factured')->get();
+        $Bls = Bl::where('ClientId',request('Client'))->where('Factured','Non')->get();
         if(count($Bls) == 0)
         {
          
@@ -264,18 +318,20 @@ class CaisseController extends Controller
         foreach($Bls as $Bl)
         {
 
+          $total += $Bl->total;
+
         
         
-          $bds = Bldetails::where('Bl_id',$Bl->id)->get();
+          // $bds = Bldetails::where('Bl_id',$Bl->id)->get();
          
         
-          foreach($bds as $bd)
-          {
+          // foreach($bds as $bd)
+          // {
            
-            $total = $total + ($bd->Price_HT *  $bd->Quantity);
+          //   $total = $total + ($bd->Price_HT *  $bd->Quantity);
            
 
-          }
+          // }
 
 
         }/** End Count Total */
@@ -384,7 +440,7 @@ class CaisseController extends Controller
           $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
  
           $user =  Auth::id();
- 
+          $role = Auth::user()->role;
           
           $Credits = Clientcredit::all();
        
@@ -392,7 +448,8 @@ class CaisseController extends Controller
           return response()->json([
             "user"=>$user,
             "caisses" => $caisses,
-            "Credits" => $Credits
+            "Credits" => $Credits,
+            "role" => $role
           
           ]);
         }
@@ -421,6 +478,7 @@ class CaisseController extends Controller
         $caisse->save();
 
          $user = Auth::id();
+         $role = Auth::user()->role;
 
 
 
@@ -485,7 +543,8 @@ class CaisseController extends Controller
                 
                 return response()->json([
                   "user" => $user,
-                  "caisses" => $caisses
+                  "caisses" => $caisses,
+                  "role" => $role
             
                 ]);
                 
@@ -528,7 +587,8 @@ class CaisseController extends Controller
                 
                 return response()->json([
                   "user" => $user,
-                  "caisses" => $caisses
+                  "caisses" => $caisses,
+                  "role" => $role
             
                 ]);
 
@@ -556,7 +616,8 @@ class CaisseController extends Controller
         
         return response()->json([
           "user" => $user,
-          "caisses" => $caisses
+          "caisses" => $caisses,
+          "role" => $role
     
         ]);
        
@@ -659,12 +720,14 @@ class CaisseController extends Controller
        $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
 
      $user =  Auth::id();
+     $role = Auth::user()->role;
      
       
 
       return response()->json([
         "user"=>$user,
-        "caisses" => $caisses
+        "caisses" => $caisses,
+        "role" => $role
       
       ]);
 
@@ -688,13 +751,15 @@ class CaisseController extends Controller
        $caisses = Caisdetails::with('user')->where('Caisse_id',$caisseD->Caisse_id)->orderBy('created_at','DESC')->get();
 
      $user =  Auth::id();
+     $role = Auth::user()->role;
      
       
 
       return response()->json([
         "user"=>$user,
         "caisses" => $caisses,
-        "client" => $caisse
+        "client" => $caisse,
+        "role" => $role
       
       ]);
 
@@ -713,11 +778,12 @@ class CaisseController extends Controller
       $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
 
       $user =  Auth::id();
-    
+      $role = Auth::user()->role;
 
        return response()->json([
         "user"=>$user,
-        "caisses" => $caisses
+        "caisses" => $caisses,
+        "role" =>$role
       ]);
   }
 
@@ -727,11 +793,15 @@ class CaisseController extends Controller
 
     $Cais = Caisse::find( $caisse->Caisse_id);
     $Cais->Amount =  $Cais->Amount - $caisse->Amount;
-    
+
+    $Facture = Facture::find($caisse->Bl_id);
+    $Facture->status = "Not Payed";
+    $Facture->save();
 
     $caisse->delete();
 
     $caissesD = Caisdetails::where('Caisse_id',$Cais->id)->get();
+   
     if(count($caissesD) != 0){
       $Cais->save();
 
@@ -747,11 +817,13 @@ class CaisseController extends Controller
     $caisses = Caisse::with('user')->orderBy('created_at','DESC')->get();
 
     $user =  Auth::id();
+    $role = Auth::user()->role;
   
 
      return response()->json([
       "user"=>$user,
-      "caisses" => $caisses
+      "caisses" => $caisses,
+      "role" => $role
     ]);
 }
 
@@ -768,10 +840,12 @@ class CaisseController extends Controller
               $today = Carbon::today();
               
               $caisses = Caisse::with('user')->whereDate('created_at',"=",$today)->get();
+              $role = Auth::user()->role;
     
               return response()->json([
                 "user"=>$user,
-                "caisses" => $caisses
+                "caisses" => $caisses,
+                "role" => $role
               
               ]);
             }
@@ -783,10 +857,11 @@ class CaisseController extends Controller
               
               $caisses = Caisse::with('user')->whereDate('created_at',"=",$yesterday)->get();
 
-    
+              $role = Auth::user()->role;
               return response()->json([
                 "user"=>$user,
-                "caisses" => $caisses
+                "caisses" => $caisses,
+                "role" => $role
               
               ]);
             }
@@ -897,7 +972,7 @@ class CaisseController extends Controller
 
             
               
-            $Clients = Client::all();
+              $Clients = Client::orderBy('Name','ASC')->get();
 
              
             $cls =' <option value="" disabled selected>Selectionner Client</option>';
